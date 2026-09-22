@@ -179,15 +179,13 @@ Quelques conventions transverses :
 
 ## Équipe
 
-<!-- Rôles et profils GitHub à compléter pour les membres concernés. -->
-
-| Membre | Rôle | GitHub |
-|---|---|---|
-| **Darius HOUESSOU-KODE** | Lead | [@darius202](https://github.com/darius202) |
-| **LETISSIA ALLOU** | *à préciser* | *à préciser* |
-| **BABA Traoré Hannatou** | *à préciser* | *à préciser* |
-| **HOUEGBE Uriel** | *à préciser* | *à préciser* |
-| **NABOUDJA Tchapo Joseph** | *à préciser* | *à préciser* |
+| Membre | Rôle |
+|---|---|
+| **Darius HOUESSOU-KODE** | Chef d'équipe (Lead) |
+| **LETISSIA ALLOU** | Membre |
+| **BABA Traoré Hannatou** | Membre |
+| **HOUEGBE Uriel** | Membre |
+| **NABOUDJA Tchapo Joseph** | Membre |
 
 Projet encadré par le **FlutterFire Summer Camp** — édition 2026.
 
