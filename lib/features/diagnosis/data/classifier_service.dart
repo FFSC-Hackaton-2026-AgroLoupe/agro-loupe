@@ -1,6 +1,7 @@
 import 'dart:isolate';
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:image/image.dart' as img;
 import 'package:tflite_flutter/tflite_flutter.dart';
@@ -73,44 +74,7 @@ class ClassifierService {
       throw ModelException.unavailable(cause: error);
     }
 
-    return _rank(output[0], labels, profile, topK);
-  }
-
-  /// Ne conserve que les classes de la culture choisie, renormalise, puis trie.
-  ///
-  /// La renormalisation compte : sur une feuille de tomate, le modèle partagé
-  /// place parfois une maladie du pommier en deuxième position. L'écarter puis
-  /// répartir sa probabilité sur les classes pertinentes rend au bon résultat
-  /// la confiance qui lui revient.
-  List<Prediction> _rank(
-    List<double> scores,
-    List<String> labels,
-    CropProfile profile,
-    int topK,
-  ) {
-    final prefix = profile.labelPrefix;
-    final kept = <int>[
-      for (var i = 0; i < labels.length; i++)
-        if (prefix == null || labels[i].startsWith(prefix)) i,
-    ];
-
-    if (kept.isEmpty) {
-      throw ModelException(
-        "Les étiquettes du modèle ne correspondent pas à la culture "
-        '« ${profile.displayName} ».',
-      );
-    }
-
-    final total = kept.fold<double>(0, (sum, i) => sum + scores[i]);
-    final predictions = [
-      for (final i in kept)
-        Prediction(
-          label: labels[i],
-          confidence: total > 0 ? scores[i] / total : 0,
-        ),
-    ]..sort((a, b) => b.confidence.compareTo(a.confidence));
-
-    return predictions.take(topK).toList(growable: false);
+    return rankPredictions(output[0], labels, profile, topK);
   }
 
   Future<Interpreter> _interpreterFor(CropProfile profile) async {
@@ -190,4 +154,43 @@ Uint8List _prepareImage(Uint8List bytes, int size) {
     }
   }
   return rgb;
+}
+
+/// Ne conserve que les classes de la culture choisie, renormalise, puis trie.
+///
+/// La renormalisation compte : sur une feuille de tomate, le modèle partagé
+/// place parfois une maladie du pommier en deuxième position. L'écarter puis
+/// répartir sa probabilité sur les classes pertinentes rend au bon résultat la
+/// confiance qui lui revient — une douzaine de points, mesurés sur une photo
+/// réelle de mildiou.
+@visibleForTesting
+List<Prediction> rankPredictions(
+  List<double> scores,
+  List<String> labels,
+  CropProfile profile,
+  int topK,
+) {
+  final prefix = profile.labelPrefix;
+  final kept = <int>[
+    for (var i = 0; i < labels.length; i++)
+      if (prefix == null || labels[i].startsWith(prefix)) i,
+  ];
+
+  if (kept.isEmpty) {
+    throw ModelException(
+      "Les étiquettes du modèle ne correspondent pas à la culture "
+      '« ${profile.displayName} ».',
+    );
+  }
+
+  final total = kept.fold<double>(0, (sum, i) => sum + scores[i]);
+  final predictions = [
+    for (final i in kept)
+      Prediction(
+        label: labels[i],
+        confidence: total > 0 ? scores[i] / total : 0,
+      ),
+  ]..sort((a, b) => b.confidence.compareTo(a.confidence));
+
+  return predictions.take(topK).toList(growable: false);
 }
