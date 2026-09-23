@@ -7,8 +7,10 @@ Cette application embarque des modèles d'apprentissage automatique tiers.
 1. CropNet — Classificateur des maladies du manioc
    Auteur  : Google
    Source  : https://www.kaggle.com/models/google/cropnet/tfLite/classifier-cassava-disease-v1
+   Modèle  : google/cropnet/classifier/cassava_disease_V1/1
+             (format de déploiement TF Lite, 1.tflite, 16,86 Mo)
    Fichier : assets/models/cassava_cropnet.tflite
-   Licence : à confirmer sur la page du modèle (probablement Apache 2.0)
+   Licence : Apache License 2.0
 
 --------------------------------------------------------------------------------
 2. Plant Disease — Classificateur 38 classes (PlantVillage, MobileNet V2)

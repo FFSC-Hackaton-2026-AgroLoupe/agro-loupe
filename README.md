@@ -138,7 +138,8 @@ L'utilisateur choisit sa culture avant de photographier : seules les classes de
 cette culture sont ensuite prises en compte, ce qui améliore nettement la
 précision par rapport à un choix parmi 38 possibilités.
 
-Attributions et licences complètes dans [`NOTICE`](NOTICE).
+Les deux modèles sont publiés sous licence **Apache 2.0**. Attributions et
+références complètes dans [`NOTICE`](NOTICE).
 
 ---
 
@@ -193,9 +194,11 @@ Quelques conventions transverses :
 
 - [x] Cahier des charges et règles de développement
 - [x] Modèle du manioc (CropNet) embarqué
-- [ ] Modèle tomate et maïs (conversion PlantVillage à faire)
+- [x] Modèle tomate et maïs (PlantVillage converti en TFLite)
 - [x] Dépendances et squelette de l'architecture
 - [ ] Fonctionnalité *diagnosis* (photo → résultat)
+  - [x] `ClassifierService` paramétré par culture
+  - [ ] Repository, provider et écrans
 - [ ] Fonctionnalité *treatments* (Firestore + règles de sécurité)
 - [ ] Fonctionnalité *history* (SQLite)
 - [ ] Intégration continue (`flutter analyze` + `flutter test` sur chaque PR)
