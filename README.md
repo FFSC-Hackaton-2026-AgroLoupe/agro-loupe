@@ -83,8 +83,8 @@ les fiches de traitement, en lecture seule.
 
 - Flutter 3.35 ou plus récent (canal `stable`) — vérifier avec `flutter doctor`
 - Un appareil Android ou un émulateur
-- Le modèle `plant_disease.tflite` et son fichier `labels.txt` dans `assets/models/`
-  *(ces fichiers ne sont pas encore dans le dépôt — voir l'état d'avancement ci-dessous)*
+- Les modèles de `assets/models/` — celui du manioc est versionné ; celui de la
+  tomate et du maïs se produit avec [`tools/plantvillage_to_tflite.md`](tools/plantvillage_to_tflite.md)
 
 **Installation**
 
@@ -115,6 +115,30 @@ flutter test                  # Lancer les tests
 flutter run                   # Lancer sur l'appareil connecté
 flutter build apk --release   # Construire l'APK de démonstration
 ```
+
+---
+
+## Modèles de diagnostic
+
+L'application couvre trois cultures au moyen de deux modèles, tous deux exécutés
+sur l'appareil, sans réseau.
+
+| Culture | Modèle | Classes | Sortie |
+|---|---|---|---|
+| Manioc | **CropNet** (Google) | 6 | probabilités |
+| Tomate · Maïs | **PlantVillage** MobileNet V2 (Rishit Dagli) | 38, dont 10 tomate et 4 maïs | probabilités |
+
+Les deux attendent la même entrée — 224 × 224 pixels, RGB entre 0 et 1 — et
+renvoient directement des probabilités. **Ne pas leur appliquer de softmax** :
+la page Kaggle du second annonce des logits, mais la mesure sur le modèle
+converti donne une somme de 1,000. Un softmax de plus écraserait les scores
+sous le seuil de confiance, sans provoquer la moindre erreur.
+
+L'utilisateur choisit sa culture avant de photographier : seules les classes de
+cette culture sont ensuite prises en compte, ce qui améliore nettement la
+précision par rapport à un choix parmi 38 possibilités.
+
+Attributions et licences complètes dans [`NOTICE`](NOTICE).
 
 ---
 
@@ -168,7 +192,8 @@ Quelques conventions transverses :
 ## État d'avancement
 
 - [x] Cahier des charges et règles de développement
-- [ ] Modèle TFLite + étiquettes dans `assets/models/`
+- [x] Modèle du manioc (CropNet) embarqué
+- [ ] Modèle tomate et maïs (conversion PlantVillage à faire)
 - [x] Dépendances et squelette de l'architecture
 - [ ] Fonctionnalité *diagnosis* (photo → résultat)
 - [ ] Fonctionnalité *treatments* (Firestore + règles de sécurité)

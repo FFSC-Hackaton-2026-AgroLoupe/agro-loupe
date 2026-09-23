@@ -6,11 +6,23 @@ abstract final class AppConstants {
   /// Nom affiché de l'application.
   static const String appName = 'AgroLoupe';
 
-  /// Modèle de classification embarqué dans l'APK.
-  static const String modelAsset = 'assets/models/plant_disease.tflite';
+  /// Modèle du manioc (CropNet, Google) : sorties déjà en probabilités.
+  static const String cassavaModelAsset =
+      'assets/models/cassava_cropnet.tflite';
+  static const String cassavaLabelsAsset = 'assets/models/cassava_labels.txt';
 
-  /// Étiquettes du modèle, une par ligne, dans l'ordre de ses sorties.
-  static const String labelsAsset = 'assets/models/labels.txt';
+  /// Modèle tomate et maïs (PlantVillage, 38 classes).
+  ///
+  /// Sorties déjà en probabilités, malgré une documentation qui annonce des
+  /// logits : la somme mesurée sur le modèle converti vaut 1,000. Ne pas
+  /// appliquer de softmax, cela écraserait les scores sous le seuil.
+  static const String plantVillageModelAsset =
+      'assets/models/plantvillage.tflite';
+  static const String plantVillageLabelsAsset =
+      'assets/models/plantvillage_labels.txt';
+
+  /// Taille d'entrée commune aux deux modèles, en pixels.
+  static const int modelInputSize = 224;
 
   /// En dessous de ce score, le diagnostic est présenté comme incertain
   /// plutôt que comme un résultat sûr (voir la règle produit du cahier des charges).

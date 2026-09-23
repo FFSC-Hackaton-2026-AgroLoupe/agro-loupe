@@ -1,0 +1,27 @@
+AgroLoupe
+Copyright 2026 Équipe AgroLoupe — FlutterFire Summer Camp
+
+Cette application embarque des modèles d'apprentissage automatique tiers.
+
+--------------------------------------------------------------------------------
+1. CropNet — Classificateur des maladies du manioc
+   Auteur  : Google
+   Source  : https://www.kaggle.com/models/google/cropnet/tfLite/classifier-cassava-disease-v1
+   Fichier : assets/models/cassava_cropnet.tflite
+   Licence : à confirmer sur la page du modèle (probablement Apache 2.0)
+
+--------------------------------------------------------------------------------
+2. Plant Disease — Classificateur 38 classes (PlantVillage, MobileNet V2)
+   Auteur  : Rishit Dagli
+   Source  : https://www.kaggle.com/models/rishitdagli/plant-disease
+   Fichier : assets/models/plantvillage.tflite
+   Licence : Apache License 2.0
+
+   Entraîné sur le jeu de données PlantVillage :
+   Hughes, David P., et Marcel Salathé. « An Open Access Repository of Images on
+   Plant Health to Enable the Development of Mobile Disease Diagnostics. »
+   arXiv:1511.08060, avril 2016. http://arxiv.org/abs/1511.08060
+
+--------------------------------------------------------------------------------
+
+Licence Apache 2.0 : http://www.apache.org/licenses/LICENSE-2.0

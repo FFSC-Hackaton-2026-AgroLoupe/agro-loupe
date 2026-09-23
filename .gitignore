@@ -44,3 +44,5 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 CLAUDE.md
+# SavedModel TensorFlow : matiere premiere de la conversion, jamais embarquee
+tools/_savedmodel/
