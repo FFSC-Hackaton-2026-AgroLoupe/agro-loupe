@@ -1,30 +1,67 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
+import 'package:agro_loupe/app.dart';
+import 'package:agro_loupe/core/services/connectivity_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
 
-import 'package:agro_loupe/main.dart';
+class _MockConnectivityService extends Mock implements ConnectivityService {}
+
+/// `FilledButton.icon` construit une sous-classe de [FilledButton] : un
+/// `find.byType` échouerait, car il compare le type exact.
+final photoButton = find.byWidgetPredicate(
+  (widget) => widget is FilledButton,
+  description: 'bouton « Prendre une photo »',
+);
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  late _MockConnectivityService connectivity;
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+  setUp(() {
+    connectivity = _MockConnectivityService();
+    // L'application ne doit jamais toucher au canal natif pendant un test.
+    when(
+      () => connectivity.onStatusChanged,
+    ).thenAnswer((_) => const Stream<ConnectionStatus>.empty());
+  });
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
+  Future<void> pumpApp(WidgetTester tester) async {
+    await tester.pumpWidget(AgroLoupeApp(connectivityService: connectivity));
     await tester.pump();
+  }
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+  testWidgets("l'accueil invite à photographier une feuille", (tester) async {
+    await pumpApp(tester);
+
+    expect(find.text('AgroLoupe'), findsOneWidget);
+    expect(find.text('Photographiez une feuille'), findsOneWidget);
+    expect(photoButton, findsOneWidget);
+    expect(find.text('Prendre une photo'), findsOneWidget);
+  });
+
+  testWidgets('aucun bandeau hors-ligne tant que le réseau est là', (
+    tester,
+  ) async {
+    when(
+      () => connectivity.onStatusChanged,
+    ).thenAnswer((_) => Stream.value(ConnectionStatus.online));
+
+    await pumpApp(tester);
+
+    expect(find.byIcon(Icons.cloud_off), findsNothing);
+  });
+
+  testWidgets('le bandeau hors-ligne apparaît sans bloquer le bouton', (
+    tester,
+  ) async {
+    when(
+      () => connectivity.onStatusChanged,
+    ).thenAnswer((_) => Stream.value(ConnectionStatus.offline));
+
+    await pumpApp(tester);
+
+    expect(find.byIcon(Icons.cloud_off), findsOneWidget);
+    // Le diagnostic reste accessible : c'est la promesse produit.
+    final button = tester.widget<FilledButton>(photoButton);
+    expect(button.onPressed, isNotNull);
   });
 }

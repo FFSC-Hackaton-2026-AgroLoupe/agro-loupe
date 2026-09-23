@@ -169,7 +169,7 @@ Quelques conventions transverses :
 
 - [x] Cahier des charges et règles de développement
 - [ ] Modèle TFLite + étiquettes dans `assets/models/`
-- [ ] Dépendances et squelette de l'architecture
+- [x] Dépendances et squelette de l'architecture
 - [ ] Fonctionnalité *diagnosis* (photo → résultat)
 - [ ] Fonctionnalité *treatments* (Firestore + règles de sécurité)
 - [ ] Fonctionnalité *history* (SQLite)
