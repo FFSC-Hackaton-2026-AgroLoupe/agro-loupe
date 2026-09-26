@@ -128,11 +128,14 @@ sur l'appareil, sans réseau.
 | Manioc | **CropNet** (Google) | 6 | probabilités |
 | Tomate · Maïs | **PlantVillage** MobileNet V2 (Rishit Dagli) | 38, dont 10 tomate et 4 maïs | probabilités |
 
-Les deux attendent la même entrée — 224 × 224 pixels, RGB entre 0 et 1 — et
-renvoient directement des probabilités. **Ne pas leur appliquer de softmax** :
-la page Kaggle du second annonce des logits, mais la mesure sur le modèle
-converti donne une somme de 1,000. Un softmax de plus écraserait les scores
-sous le seuil de confiance, sans provoquer la moindre erreur.
+Les deux attendent des images de 224 × 224, mais pas dans le même encodage :
+CropNet est quantifié en entiers 8 bits et reçoit les octets bruts, PlantVillage
+travaille en flottants entre 0 et 1. Le type est lu sur le tenseur à l'exécution.
+
+Après déquantification, les deux renvoient des probabilités. **Ne pas leur
+appliquer de softmax** : la page Kaggle du second annonce des logits, mais la
+mesure donne une somme de 1,000. Un softmax de plus écraserait les scores sous
+le seuil de confiance, sans provoquer la moindre erreur.
 
 L'utilisateur choisit sa culture avant de photographier : seules les classes de
 cette culture sont ensuite prises en compte, ce qui améliore nettement la

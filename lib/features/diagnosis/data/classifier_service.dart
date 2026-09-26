@@ -33,9 +33,13 @@ class ClassifierService {
   /// Analyse [imageBytes] et renvoie les [topK] hypothèses les plus probables,
   /// de la plus forte à la plus faible.
   ///
-  /// Les deux modèles renvoient déjà des probabilités : aucun softmax n'est
-  /// appliqué ici. En ajouter un écraserait les scores sous le seuil de
-  /// confiance sans provoquer la moindre erreur visible.
+  /// Les deux modèles ne parlent pas le même langage : CropNet est entièrement
+  /// quantifié en entiers 8 bits, PlantVillage travaille en flottants. Le type
+  /// attendu est lu sur le tenseur lui-même plutôt que déclaré quelque part,
+  /// pour qu'il ne puisse jamais diverger du fichier réellement embarqué.
+  ///
+  /// Aucun softmax n'est appliqué : après déquantification, les deux modèles
+  /// renvoient déjà des probabilités dont la somme vaut 1.
   Future<List<Prediction>> classify({
     required Uint8List imageBytes,
     required CropProfile profile,
@@ -44,29 +48,24 @@ class ClassifierService {
     final interpreter = await _interpreterFor(profile);
     final labels = await _labelsFor(profile);
 
+    final inputTensor = interpreter.getInputTensor(0);
+    final outputTensor = interpreter.getOutputTensor(0);
+    // Côté du carré attendu, lu sur le modèle : [1, côté, côté, 3].
+    final size = inputTensor.shape[1];
+
     // Le décodage et le redimensionnement d'une photo d'appareil dépassent
     // largement les 100 ms : on les sort du fil de l'interface.
-    final size = profile.inputSize;
     final rgb = await Isolate.run(() => _prepareImage(imageBytes, size));
 
-    final input = List.generate(
-      1,
-      (_) => List.generate(
-        size,
-        (y) => List.generate(size, (x) {
-          final offset = (y * size + x) * 3;
-          return [
-            rgb[offset] / 255.0,
-            rgb[offset + 1] / 255.0,
-            rgb[offset + 2] / 255.0,
-          ];
-        }),
-      ),
-    );
-    final output = List.generate(
-      1,
-      (_) => List<double>.filled(labels.length, 0),
-    );
+    final quantizedInput = inputTensor.type == TensorType.uint8;
+    final quantizedOutput = outputTensor.type == TensorType.uint8;
+
+    final input = quantizedInput
+        ? _buildInput(rgb, size, (value) => value)
+        : _buildInput(rgb, size, (value) => value / 255.0);
+    final output = quantizedOutput
+        ? List.generate(1, (_) => List<int>.filled(labels.length, 0))
+        : List.generate(1, (_) => List<double>.filled(labels.length, 0));
 
     try {
       interpreter.run(input, output);
@@ -74,7 +73,39 @@ class ClassifierService {
       throw ModelException.unavailable(cause: error);
     }
 
-    return rankPredictions(output[0], labels, profile, topK);
+    final scores = quantizedOutput
+        ? dequantize(
+            (output as List<List<int>>)[0],
+            outputTensor.params.scale,
+            outputTensor.params.zeroPoint,
+          )
+        : (output as List<List<double>>)[0];
+
+    return rankPredictions(scores, labels, profile, topK);
+  }
+
+  /// Construit le tenseur d'entrée [1, côté, côté, 3] en appliquant [convert]
+  /// à chaque composante : identité pour un modèle quantifié, division par 255
+  /// pour un modèle en flottants.
+  List<List<List<List<num>>>> _buildInput(
+    Uint8List rgb,
+    int size,
+    num Function(int value) convert,
+  ) {
+    return List.generate(
+      1,
+      (_) => List.generate(
+        size,
+        (y) => List.generate(size, (x) {
+          final offset = (y * size + x) * 3;
+          return [
+            convert(rgb[offset]),
+            convert(rgb[offset + 1]),
+            convert(rgb[offset + 2]),
+          ];
+        }),
+      ),
+    );
   }
 
   Future<Interpreter> _interpreterFor(CropProfile profile) async {
@@ -194,3 +225,13 @@ List<Prediction> rankPredictions(
 
   return predictions.take(topK).toList(growable: false);
 }
+
+/// Ramène une sortie quantifiée en probabilités réelles.
+///
+/// Un modèle quantifié range ses sorties dans des entiers 0-255 ; la valeur
+/// réelle vaut `scale × (entier − zéro)`. Sans cette étape, les « probabilités »
+/// seraient des entiers bruts et le seuil de confiance n'aurait aucun sens.
+@visibleForTesting
+List<double> dequantize(List<int> raw, double scale, int zeroPoint) => [
+  for (final value in raw) scale * (value - zeroPoint),
+];

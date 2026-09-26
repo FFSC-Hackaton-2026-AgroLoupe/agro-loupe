@@ -119,4 +119,32 @@ void main() {
       );
     });
   });
+
+  group('déquantification', () {
+    // Paramètres réels de la sortie de CropNet, relevés sur le fichier.
+    const scale = 0.00390625; // 1/256
+    const zeroPoint = 0;
+
+    test('ramène des entiers 0-255 en probabilités', () {
+      final p = dequantize([255, 128, 0], scale, zeroPoint);
+
+      expect(p[0], closeTo(0.996, 0.001));
+      expect(p[1], closeTo(0.500, 0.001));
+      expect(p[2], 0);
+    });
+
+    test('une sortie complète somme bien à 1', () {
+      // Distribution mesurée sur une photo de tomates : « unknown » à 99,6 %.
+      final p = dequantize([0, 0, 0, 0, 1, 255], scale, zeroPoint);
+
+      expect(p.reduce((a, b) => a + b), closeTo(1.0, 0.01));
+      expect(p.last, greaterThan(0.99));
+    });
+
+    test('tient compte du point zéro non nul', () {
+      final p = dequantize([128], 0.007874015718698502, 128);
+
+      expect(p.single, closeTo(0, 0.0001));
+    });
+  });
 }
