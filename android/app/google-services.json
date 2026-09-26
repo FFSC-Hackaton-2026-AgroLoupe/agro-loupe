@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "70333013942",
+    "project_id": "agroloupe",
+    "storage_bucket": "agroloupe.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:70333013942:android:c655abcb96203102efeb17",
+        "android_client_info": {
+          "package_name": "agro.loupe.com.agro_loupe"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCcoJ33r6mftM0n-BnDxt5Q14P4_s3f8Fk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
