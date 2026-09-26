@@ -46,6 +46,9 @@ abstract final class AppConstants {
   /// Le master pleine résolution est dans `design/sources/`, hors APK.
   static const String heroImageAsset = 'assets/images/hero_farmer.jpg';
 
+  /// Fiches maladies embarquées : une fiche doit rester lisible sans réseau.
+  static const String treatmentsAsset = 'assets/data/treatments.json';
+
   /// Collection Firestore des fiches de traitement (lecture seule).
   static const String treatmentsCollection = 'treatments';
 }

@@ -41,6 +41,21 @@ class DiagnosisSuccess extends DiagnosisState {
   bool get isFallback => shownIndex > 0;
 }
 
+/// L'utilisateur a reconnu les symptômes : le traitement peut être affiché.
+///
+/// Tant qu'il n'a pas confirmé, on ne conseille rien — une hypothèse rejetée
+/// ne doit pas conduire à traiter la mauvaise maladie.
+class DiagnosisConfirmed extends DiagnosisState {
+  const DiagnosisConfirmed(this.diagnosis, {this.shownIndex = 0});
+
+  final Diagnosis diagnosis;
+
+  /// Conservé pour pouvoir revenir sur la bonne hypothèse.
+  final int shownIndex;
+
+  Prediction get prediction => diagnosis.predictions[shownIndex];
+}
+
 /// Toutes les hypothèses ont été rejetées par l'utilisateur.
 class DiagnosisExhausted extends DiagnosisState {
   const DiagnosisExhausted(this.diagnosis);
@@ -113,6 +128,40 @@ class DiagnosisProvider extends ChangeNotifier {
             )
           : DiagnosisExhausted(current.diagnosis),
     );
+  }
+
+  /// L'utilisateur reconnaît les symptômes décrits.
+  void confirmCurrent() {
+    final current = _state;
+    if (current is! DiagnosisSuccess) return;
+    _setState(
+      DiagnosisConfirmed(current.diagnosis, shownIndex: current.shownIndex),
+    );
+  }
+
+  /// Revient d'une étape en arrière.
+  ///
+  /// Renvoie `false` quand il n'y a plus d'étape précédente : l'appelant laisse
+  /// alors le système fermer l'application.
+  bool goBack() {
+    final current = _state;
+    switch (current) {
+      // Depuis la fiche, on retrouve l'hypothèse qu'on venait de confirmer.
+      case DiagnosisConfirmed():
+        _setState(
+          DiagnosisSuccess(current.diagnosis, shownIndex: current.shownIndex),
+        );
+        return true;
+      case DiagnosisSuccess():
+      case DiagnosisExhausted():
+      case DiagnosisError():
+        _setState(const DiagnosisIdle());
+        return true;
+      // Une analyse en cours ne s'interrompt pas à mi-chemin.
+      case DiagnosisIdle():
+      case DiagnosisAnalyzing():
+        return false;
+    }
   }
 
   /// Revient à l'écran de départ.

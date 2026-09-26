@@ -66,6 +66,17 @@ class DiagnosisColors extends ThemeExtension<DiagnosisColors> {
 
 /// Raccourci de lecture : `context.diagnosisColors.healthy`.
 extension DiagnosisColorsContext on BuildContext {
-  DiagnosisColors get diagnosisColors =>
-      Theme.of(this).extension<DiagnosisColors>()!;
+  /// Retombe sur la palette correspondant à la luminosité du thème si
+  /// l'extension n'y a pas été enregistrée.
+  ///
+  /// Un `!` ici ferait disparaître tout l'écran de diagnostic pour un simple
+  /// oubli de configuration du thème : ce n'est pas un compromis acceptable
+  /// sur l'écran qui porte le résultat.
+  DiagnosisColors get diagnosisColors {
+    final theme = Theme.of(this);
+    return theme.extension<DiagnosisColors>() ??
+        (theme.brightness == Brightness.dark
+            ? DiagnosisColors.dark
+            : DiagnosisColors.light);
+  }
 }

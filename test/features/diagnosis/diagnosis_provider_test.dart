@@ -124,6 +124,34 @@ void main() {
       },
     );
 
+    test('confirmer ouvre la fiche de traitement', () async {
+      await provider.analyze(PhotoSource.camera);
+
+      provider.confirmCurrent();
+
+      final state = provider.state;
+      expect(state, isA<DiagnosisConfirmed>());
+      expect(
+        (state as DiagnosisConfirmed).prediction.label,
+        'Tomato___maladie_0',
+      );
+    });
+
+    test('confirmer la deuxième hypothèse retient bien celle-là', () async {
+      await provider.analyze(PhotoSource.camera);
+      provider.rejectCurrent();
+
+      provider.confirmCurrent();
+
+      final state = provider.state as DiagnosisConfirmed;
+      expect(state.prediction.label, 'Tomato___maladie_1');
+    });
+
+    test('une confirmation hors résultat ne fait rien', () {
+      provider.confirmCurrent();
+      expect(provider.state, isA<DiagnosisIdle>());
+    });
+
     test('un rejet hors résultat ne fait rien', () {
       provider.rejectCurrent();
       expect(provider.state, isA<DiagnosisIdle>());

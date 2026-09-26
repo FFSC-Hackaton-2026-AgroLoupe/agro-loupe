@@ -9,6 +9,8 @@ import 'features/diagnosis/data/classifier_service.dart';
 import 'features/diagnosis/data/diagnosis_repository.dart';
 import 'features/diagnosis/state/diagnosis_provider.dart';
 import 'features/diagnosis/ui/screens/home_screen.dart';
+import 'features/treatments/data/treatment_repository.dart';
+import 'features/treatments/state/treatment_provider.dart';
 
 /// Racine de l'application : injection des dépendances, puis thème et écrans.
 class AgroLoupeApp extends StatelessWidget {
@@ -16,12 +18,14 @@ class AgroLoupeApp extends StatelessWidget {
     super.key,
     this.connectivityService,
     this.diagnosisRepository,
+    this.treatmentRepository,
   });
 
   /// Permettent aux tests de fournir des doublures. En production, laisser
   /// `null` : l'application crée elle-même les instances réelles.
   final ConnectivityService? connectivityService;
   final DiagnosisRepository? diagnosisRepository;
+  final TreatmentRepository? treatmentRepository;
 
   @override
   Widget build(BuildContext context) {
@@ -52,11 +56,20 @@ class AgroLoupeApp extends StatelessWidget {
           update: (_, classifier, photos, _) =>
               diagnosisRepository ?? DiagnosisRepository(classifier, photos),
         ),
+        Provider<TreatmentRepository>(
+          create: (_) => treatmentRepository ?? TreatmentRepository(),
+        ),
 
         // 4. États d'écran.
         ChangeNotifierProvider<DiagnosisProvider>(
           create: (context) =>
               DiagnosisProvider(context.read<DiagnosisRepository>()),
+        ),
+        // Les fiches sont chargées dès le démarrage : le fichier est petit, et
+        // une fiche doit s'afficher sans attente après un diagnostic.
+        ChangeNotifierProvider<TreatmentProvider>(
+          create: (context) =>
+              TreatmentProvider(context.read<TreatmentRepository>())..load(),
         ),
       ],
       child: MaterialApp(

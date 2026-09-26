@@ -4,10 +4,17 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/theme/diagnosis_colors.dart';
+import '../../../treatments/models/treatment.dart';
+import '../../../treatments/state/treatment_provider.dart';
+import '../../../treatments/ui/widgets/treatment_sections.dart';
 import '../../models/disease_names.dart';
 import '../../state/diagnosis_provider.dart';
 
-/// Résultat proposé à l'utilisateur, qui doit le confirmer.
+/// Hypothèse proposée à l'utilisateur, avec les symptômes attendus.
+///
+/// Aucun traitement n'est affiché à ce stade : tant que l'utilisateur n'a pas
+/// reconnu les symptômes, conseiller un produit reviendrait à traiter une
+/// maladie peut-être absente.
 class DiagnosisResultCard extends StatelessWidget {
   const DiagnosisResultCard(this.state, {super.key});
 
@@ -15,13 +22,14 @@ class DiagnosisResultCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final prediction = state.prediction;
-    final label = prediction.label;
+    final label = state.prediction.label;
+    final treatment = context.watch<TreatmentProvider>().forLabel(label);
+    final isUnknown = DiseaseNames.isUnknown(label);
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
       children: [
-        _Photo(path: state.diagnosis.imagePath),
+        DiagnosisPhoto(path: state.diagnosis.imagePath),
         const SizedBox(height: 20),
         if (state.isFallback)
           Padding(
@@ -32,20 +40,25 @@ class DiagnosisResultCard extends StatelessWidget {
             ),
           ),
         Text(
-          DiseaseNames.of(label),
+          treatment?.name ?? DiseaseNames.of(label),
           style: Theme.of(context).textTheme.headlineSmall,
         ),
         const SizedBox(height: 8),
-        _Confidence(percent: prediction.percent, label: label),
+        ConfidenceIndicator(percent: state.prediction.percent, label: label),
         const SizedBox(height: 24),
-        const _Confirmation(),
+        if (treatment != null) SymptomsPanel(treatment: treatment),
+        if (isUnknown)
+          const _Restart()
+        else
+          _Confirmation(hasSymptoms: treatment != null),
       ],
     );
   }
 }
 
-class _Photo extends StatelessWidget {
-  const _Photo({required this.path});
+/// Photographie analysée.
+class DiagnosisPhoto extends StatelessWidget {
+  const DiagnosisPhoto({super.key, required this.path});
 
   final String path;
 
@@ -70,59 +83,138 @@ class _Photo extends StatelessWidget {
   }
 }
 
-/// Niveau de confiance, coloré selon ce qu'il signifie.
-class _Confidence extends StatelessWidget {
-  const _Confidence({required this.percent, required this.label});
+/// Degré de correspondance entre la photo et la maladie proposée.
+///
+/// Le pourcentage brut est relégué : il dit à quel point le modèle est sûr, ce
+/// qui n'est pas la même chose que la vérité — on a mesuré une réponse fausse
+/// annoncée à 97 %. Ce qui compte pour l'utilisateur, c'est de savoir s'il doit
+/// regarder son plant de près, et c'est ce que dit le libellé.
+class ConfidenceIndicator extends StatelessWidget {
+  const ConfidenceIndicator({
+    super.key,
+    required this.percent,
+    required this.label,
+  });
 
   final int percent;
   final String label;
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final colors = context.diagnosisColors;
-    final (color, texte) = switch (label) {
+
+    final (
+      Color color,
+      String titre,
+      String aide,
+      int barres,
+    ) = switch (label) {
       _ when DiseaseNames.isUnknown(label) => (
         colors.uncertain,
-        "Ce n'est peut-être pas la bonne plante",
+        'Plante non reconnue',
+        "Vérifiez la culture choisie, puis reprenez la photo de plus près.",
+        0,
       ),
       _ when DiseaseNames.isHealthy(label) => (
         colors.healthy,
-        'Aucune maladie détectée',
+        'Aucun signe de maladie',
+        'Continuez à surveiller après les pluies.',
+        5,
       ),
-      _ when percent < 60 => (colors.uncertain, 'Diagnostic incertain'),
-      _ => (colors.diseased, 'Maladie probable'),
+      _ when percent >= 80 => (
+        colors.diseased,
+        'Forte correspondance',
+        'Les signes relevés collent bien à cette maladie.',
+        5,
+      ),
+      _ when percent >= 60 => (
+        colors.diseased,
+        'Correspondance moyenne',
+        'Comparez attentivement avec les symptômes ci-dessous.',
+        3,
+      ),
+      _ => (
+        colors.uncertain,
+        'Correspondance faible',
+        "Rien n'est sûr. Une autre photo, en plein jour, aiderait.",
+        2,
+      ),
     };
 
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withValues(alpha: 0.35)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              _Gauge(filled: barres, color: color),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  titre,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    color: color,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+              Text(
+                '$percent %',
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(aide, style: theme.textTheme.bodyMedium),
+        ],
+      ),
+    );
+  }
+}
+
+/// Cinq segments : lisible d'un coup d'œil, sans avoir à lire un nombre.
+class _Gauge extends StatelessWidget {
+  const _Gauge({required this.filled, required this.color});
+
+  final int filled;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    final vide = Theme.of(context).colorScheme.outlineVariant;
+
     return Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-          decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.15),
-            borderRadius: BorderRadius.circular(8),
+        for (var i = 0; i < 5; i++)
+          Container(
+            width: 6,
+            height: i < filled ? 18 : 10,
+            margin: const EdgeInsets.only(right: 3),
+            decoration: BoxDecoration(
+              color: i < filled ? color : vide,
+              borderRadius: BorderRadius.circular(3),
+            ),
           ),
-          child: Text(
-            '$percent %',
-            style: TextStyle(color: color, fontWeight: FontWeight.w700),
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Text(texte, style: Theme.of(context).textTheme.bodyMedium),
-        ),
       ],
     );
   }
 }
 
-/// Demande à l'utilisateur si le résultat correspond à ce qu'il observe.
-///
-/// Ce n'est pas un confort : le modèle des cultures tomate et maïs peut se
-/// tromper avec une très forte confiance, et l'agriculteur, lui, a la plante
-/// sous les yeux. Les symptômes attendus s'afficheront ici dès que les fiches
-/// de traitement seront disponibles.
+/// Demande à l'utilisateur si les symptômes correspondent à ce qu'il observe.
 class _Confirmation extends StatelessWidget {
-  const _Confirmation();
+  const _Confirmation({required this.hasSymptoms});
+
+  final bool hasSymptoms;
 
   @override
   Widget build(BuildContext context) {
@@ -135,7 +227,9 @@ class _Confirmation extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Est-ce que cela correspond à ce que vous voyez sur votre plant ?',
+              hasSymptoms
+                  ? 'Est-ce bien ce que vous voyez sur votre plant ?'
+                  : 'Est-ce que cela correspond à votre plant ?',
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 16),
@@ -150,7 +244,7 @@ class _Confirmation extends StatelessWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: FilledButton(
-                    onPressed: provider.reset,
+                    onPressed: provider.confirmCurrent,
                     child: const Text('Oui'),
                   ),
                 ),
@@ -159,6 +253,60 @@ class _Confirmation extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _Restart extends StatelessWidget {
+  const _Restart();
+
+  @override
+  Widget build(BuildContext context) {
+    return FilledButton(
+      onPressed: context.read<DiagnosisProvider>().reset,
+      child: const Text('Reprendre une photo'),
+    );
+  }
+}
+
+/// Fiche complète, affichée une fois l'hypothèse confirmée.
+class DiagnosisConfirmedCard extends StatelessWidget {
+  const DiagnosisConfirmedCard(this.state, {super.key});
+
+  final DiagnosisConfirmed state;
+
+  @override
+  Widget build(BuildContext context) {
+    final label = state.prediction.label;
+    final Treatment? treatment = context.watch<TreatmentProvider>().forLabel(
+      label,
+    );
+    final theme = Theme.of(context);
+
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
+      children: [
+        Text(
+          treatment?.name ?? DiseaseNames.of(label),
+          style: theme.textTheme.headlineSmall,
+        ),
+        const SizedBox(height: 8),
+        ConfidenceIndicator(percent: state.prediction.percent, label: label),
+        const SizedBox(height: 24),
+        if (treatment != null)
+          TreatmentSheetView(treatment: treatment)
+        else
+          Text(
+            "La fiche de cette maladie n'est pas disponible. "
+            'Montrez le plant à un agent agricole.',
+            style: theme.textTheme.bodyMedium,
+          ),
+        const SizedBox(height: 24),
+        OutlinedButton(
+          onPressed: context.read<DiagnosisProvider>().reset,
+          child: const Text('Nouveau diagnostic'),
+        ),
+      ],
     );
   }
 }

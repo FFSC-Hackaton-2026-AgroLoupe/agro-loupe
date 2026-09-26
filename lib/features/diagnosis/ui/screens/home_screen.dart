@@ -14,13 +14,36 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text(AppConstants.appName)),
-      body: const Column(
-        children: [
-          ConnectionBadge(),
-          Expanded(child: _Body()),
-        ],
+    final provider = context.watch<DiagnosisProvider>();
+    final peutRevenir =
+        provider.state is! DiagnosisIdle &&
+        provider.state is! DiagnosisAnalyzing;
+
+    return PopScope(
+      // Le bouton retour du téléphone remonte d'une étape au lieu de quitter
+      // l'application : c'est ce que l'utilisateur attend au milieu d'un
+      // diagnostic.
+      canPop: !peutRevenir,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) provider.goBack();
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text(AppConstants.appName),
+          leading: peutRevenir
+              ? IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  tooltip: 'Revenir',
+                  onPressed: provider.goBack,
+                )
+              : null,
+        ),
+        body: const Column(
+          children: [
+            ConnectionBadge(),
+            Expanded(child: _Body()),
+          ],
+        ),
       ),
     );
   }
@@ -37,6 +60,7 @@ class _Body extends StatelessWidget {
       DiagnosisIdle() => const _Start(),
       DiagnosisAnalyzing() => const _Analyzing(),
       DiagnosisSuccess() => DiagnosisResultCard(state),
+      DiagnosisConfirmed() => DiagnosisConfirmedCard(state),
       DiagnosisExhausted() => const _Exhausted(),
       DiagnosisError(:final message) => _Failure(message: message),
     };

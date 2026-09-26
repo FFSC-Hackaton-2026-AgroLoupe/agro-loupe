@@ -1,0 +1,650 @@
+{
+  "version": 1,
+  "avertissement": "Les traitements sont donnés en matières actives, sans nom commercial ni dosage : les produits homologués et leurs doses varient selon les pays et les formulations. Avant diffusion, ces fiches doivent être relues par une source agronomique locale (service de vulgarisation, institut de recherche, fiche technique nationale) et le champ source renseigné.",
+  "treatments": [
+    {
+      "id": "manioc_bacteriose",
+      "modelLabel": "cbb",
+      "crop": "manioc",
+      "name": "Bactériose du manioc",
+      "severity": "élevée",
+      "symptoms": [
+        "Taches anguleuses, d'aspect translucide, arrêtées par les nervures.",
+        "Gouttes gommeuses sur les tiges et les pétioles.",
+        "Flétrissement des jeunes pousses, puis dessèchement et chute des feuilles."
+      ],
+      "confusions": [
+        "Brûlure du soleil, qui touche surtout les feuilles exposées.",
+        "Carence minérale, qui jaunit sans former de taches anguleuses."
+      ],
+      "culturalPractices": [
+        "Arracher et brûler les plants atteints, ne pas les laisser au champ.",
+        "Ne pas circuler dans la parcelle quand le feuillage est mouillé.",
+        "Nettoyer la machette entre chaque plant : la bactérie se transporte par les outils."
+      ],
+      "chemicalTreatment": [
+        "Produits à base de cuivre (hydroxyde ou oxychlorure de cuivre), en préventif.",
+        "L'efficacité reste partielle : contre une bactérie, les mesures culturales comptent davantage que le produit.",
+        "Respecter strictement la dose et le délai avant récolte indiqués sur l'étiquette du produit homologué dans votre pays."
+      ],
+      "prevention": [
+        "Ne planter que des boutures prélevées sur des plants sains.",
+        "Choisir des variétés tolérantes si elles sont disponibles localement.",
+        "Laisser la parcelle au repos ou en rotation pendant au moins six mois.",
+        "Éviter de blesser les tiges pendant l'entretien."
+      ],
+      "whenToConsult": "Dès que plusieurs plants sont touchés : la bactérie se propage vite par la pluie et les outils.",
+      "note": null,
+      "source": null
+    },
+    {
+      "id": "manioc_striure_brune",
+      "modelLabel": "cbsd",
+      "crop": "manioc",
+      "name": "Striure brune du manioc",
+      "severity": "élevée",
+      "symptoms": [
+        "Marbrures jaunes le long des nervures secondaires, sur les feuilles âgées.",
+        "Stries brunes sur les tiges encore vertes.",
+        "À la coupe, nécroses brunes et dures dans la racine."
+      ],
+      "confusions": [
+        "Mosaïque africaine, qui déforme la feuille alors que la striure suit les nervures.",
+        "Carence, qui ne provoque jamais de nécrose dans la racine."
+      ],
+      "culturalPractices": [
+        "Récolter sans attendre : les nécroses gagnent la racine avec le temps.",
+        "Détruire les plants atteints après récolte.",
+        "Ne jamais prélever de boutures sur un plant atteint."
+      ],
+      "chemicalTreatment": [
+        "Aucun produit ne soigne un virus. Un fongicide serait une dépense inutile.",
+        "Le seul levier chimique porte sur la mouche blanche qui transmet la maladie : insecticides homologués contre les aleurodes, ou huile de neem.",
+        "Respecter strictement la dose et le délai avant récolte indiqués sur l'étiquette du produit homologué dans votre pays."
+      ],
+      "prevention": [
+        "Utiliser des boutures certifiées ou issues de plants contrôlés.",
+        "Privilégier les variétés résistantes.",
+        "Réduire les populations de mouches blanches, qui transmettent le virus."
+      ],
+      "whenToConsult": "Dès la première suspicion. Le feuillage peut sembler acceptable alors que la récolte est déjà perdue.",
+      "note": "Le plus trompeur des symptômes : coupez toujours une racine pour vérifier.",
+      "source": null
+    },
+    {
+      "id": "manioc_acarien_vert",
+      "modelLabel": "cgm",
+      "crop": "manioc",
+      "name": "Acarien vert du manioc",
+      "severity": "moyenne",
+      "symptoms": [
+        "Fines taches jaunes sur les plus jeunes feuilles, près du bourgeon.",
+        "Feuilles réduites, déformées, au feuillage clairsemé.",
+        "En attaque forte, la tige se dénude et ne garde que quelques feuilles au sommet."
+      ],
+      "confusions": [
+        "Mosaïque africaine, qui donne des plages jaunes larges et non un piqueté fin.",
+        "Carence, qui touche d'abord les feuilles âgées et non les jeunes."
+      ],
+      "culturalPractices": [
+        "Ce n'est pas un champignon : un fongicide ne servirait à rien.",
+        "Planter tôt en saison des pluies : les dégâts sont les plus forts en saison sèche.",
+        "Maintenir la vigueur du plant, un plant affaibli souffre davantage."
+      ],
+      "chemicalTreatment": [
+        "Acaricides homologués, ou soufre mouillable, en cas de forte pullulation.",
+        "Huile de neem, efficace en traitement répété sur les jeunes pousses.",
+        "Éviter les insecticides à large spectre : ils détruisent les acariens prédateurs et aggravent l'attaque.",
+        "Respecter strictement la dose et le délai avant récolte indiqués sur l'étiquette du produit homologué dans votre pays."
+      ],
+      "prevention": [
+        "Choisir des variétés tolérantes.",
+        "Préserver les ennemis naturels de l'acarien, notamment les acariens prédateurs introduits en Afrique de l'Ouest."
+      ],
+      "whenToConsult": "Si la tige se dénude sur plusieurs plants.",
+      "note": "C'est un ravageur, pas une maladie. Le traitement n'est pas le même.",
+      "source": null
+    },
+    {
+      "id": "manioc_mosaique",
+      "modelLabel": "cmd",
+      "crop": "manioc",
+      "name": "Mosaïque africaine du manioc",
+      "severity": "élevée",
+      "symptoms": [
+        "Plages jaunes et vert pâle alternées sur le limbe.",
+        "Feuilles déformées, gaufrées, plus petites que la normale.",
+        "Plant rabougri, à croissance ralentie."
+      ],
+      "confusions": [
+        "Striure brune, dont les marques suivent les nervures sans déformer la feuille.",
+        "Dégâts d'acarien vert, qui donnent un piqueté fin et non des plages."
+      ],
+      "culturalPractices": [
+        "Arracher les plants atteints dès qu'ils sont repérés, avant la reprise de végétation.",
+        "Ne jamais prélever de boutures sur un plant présentant ces symptômes."
+      ],
+      "chemicalTreatment": [
+        "Aucun produit ne soigne un virus.",
+        "Le seul levier chimique porte sur la mouche blanche, vecteur du virus : insecticides homologués contre les aleurodes, ou huile de neem.",
+        "Respecter strictement la dose et le délai avant récolte indiqués sur l'étiquette du produit homologué dans votre pays."
+      ],
+      "prevention": [
+        "Boutures saines : c'est la première voie de transmission.",
+        "Variétés résistantes, largement diffusées en Afrique de l'Ouest.",
+        "Limiter les mouches blanches, qui transmettent le virus d'un plant à l'autre."
+      ],
+      "whenToConsult": "Si plus de quelques plants sont touchés dans la parcelle.",
+      "note": null,
+      "source": null
+    },
+    {
+      "id": "manioc_sain",
+      "modelLabel": "healthy",
+      "crop": "manioc",
+      "name": "Plant de manioc sain",
+      "severity": "aucune",
+      "symptoms": [
+        "Feuilles d'un vert uniforme, bien découpées, sans taches ni déformation.",
+        "Croissance régulière, tiges fermes."
+      ],
+      "confusions": [],
+      "culturalPractices": [
+        "Continuer la surveillance : plusieurs maladies du manioc s'installent sans symptôme visible au début.",
+        "Vérifier une racine à la coupe en fin de cycle, notamment pour la striure brune."
+      ],
+      "chemicalTreatment": [
+        "Aucun traitement n'est justifié sur un plant sain. Traiter sans raison coûte de l'argent et favorise les résistances."
+      ],
+      "prevention": [
+        "Garder des boutures issues de ce plant s'il reste sain jusqu'à la récolte."
+      ],
+      "whenToConsult": "Aucune action nécessaire.",
+      "note": null,
+      "source": null
+    },
+    {
+      "id": "manioc_inconnu",
+      "modelLabel": "unknown",
+      "crop": "manioc",
+      "name": "Plante non reconnue",
+      "severity": "aucune",
+      "symptoms": [
+        "L'image ne correspond pas à une feuille de manioc reconnue par le modèle."
+      ],
+      "confusions": [],
+      "culturalPractices": [
+        "Vérifier que la culture choisie est la bonne.",
+        "Reprendre la photo au plus près d'une seule feuille, en plein jour, sans ombre portée.",
+        "Éviter les photos d'écran, les images floues et les plans trop larges."
+      ],
+      "chemicalTreatment": [
+        "Ne traitez rien tant que la cause n'est pas identifiée."
+      ],
+      "prevention": [],
+      "whenToConsult": "Si le message revient sur plusieurs photos nettes, il peut s'agir d'une affection que l'application ne couvre pas : montrez le plant à un agent agricole.",
+      "note": null,
+      "source": null
+    },
+    {
+      "id": "tomate_bacteriose",
+      "modelLabel": "Tomato___Bacterial_spot",
+      "crop": "tomate",
+      "name": "Bactériose (taches bactériennes)",
+      "severity": "élevée",
+      "symptoms": [
+        "Petites taches sombres, d'aspect huileux, entourées d'un halo jaune.",
+        "Taches également sur les fruits, rugueuses et en relief.",
+        "Les feuilles les plus atteintes jaunissent et tombent."
+      ],
+      "confusions": [
+        "Septoriose, dont les taches sont plus rondes, grises au centre.",
+        "Alternariose, dont les taches portent des anneaux concentriques."
+      ],
+      "culturalPractices": [
+        "Retirer et brûler les feuilles et fruits atteints.",
+        "Ne pas travailler dans la parcelle quand le feuillage est mouillé.",
+        "Arroser au pied et non sur le feuillage."
+      ],
+      "chemicalTreatment": [
+        "Produits à base de cuivre, en préventif et répétés après les pluies.",
+        "Contre une bactérie, aucun produit n'est curatif : le cuivre freine la propagation, il ne guérit pas les feuilles déjà atteintes.",
+        "Respecter strictement la dose et le délai avant récolte indiqués sur l'étiquette du produit homologué dans votre pays."
+      ],
+      "prevention": [
+        "Semences saines ou traitées : la bactérie se transmet par la semence.",
+        "Rotation d'au moins deux ans sans solanacées.",
+        "Espacer les plants pour que le feuillage sèche vite après la pluie."
+      ],
+      "whenToConsult": "Si les fruits sont touchés : la récolte devient invendable.",
+      "note": null,
+      "source": null
+    },
+    {
+      "id": "tomate_alternariose",
+      "modelLabel": "Tomato___Early_blight",
+      "crop": "tomate",
+      "name": "Alternariose",
+      "severity": "moyenne",
+      "symptoms": [
+        "Taches brunes portant des anneaux concentriques, en forme de cible.",
+        "Apparition d'abord sur les feuilles du bas, puis progression vers le haut.",
+        "Halo jaune autour des taches, dessèchement progressif de la feuille."
+      ],
+      "confusions": [
+        "Corynesporiose, très proche mais aux taches plus petites.",
+        "Mildiou, dont les plages sont larges, huileuses et sans anneaux."
+      ],
+      "culturalPractices": [
+        "Retirer les feuilles basses atteintes dès les premiers symptômes.",
+        "Pailler le sol pour éviter les éclaboussures de terre sur le feuillage.",
+        "Arroser au pied, jamais sur les feuilles."
+      ],
+      "chemicalTreatment": [
+        "Fongicides de contact à base de mancozèbe, en préventif et après les pluies.",
+        "Fongicides systémiques : difénoconazole ou azoxystrobine, en alternant les familles pour éviter les résistances.",
+        "En agriculture biologique : cuivre ou bouillie bordelaise.",
+        "Respecter strictement la dose et le délai avant récolte indiqués sur l'étiquette du produit homologué dans votre pays."
+      ],
+      "prevention": [
+        "Rotation de deux à trois ans.",
+        "Éliminer les débris de culture en fin de saison.",
+        "Tuteurer et aérer le feuillage."
+      ],
+      "whenToConsult": "Si la maladie atteint les étages supérieurs du plant.",
+      "note": null,
+      "source": null
+    },
+    {
+      "id": "tomate_mildiou",
+      "modelLabel": "Tomato___Late_blight",
+      "crop": "tomate",
+      "name": "Mildiou",
+      "severity": "élevée",
+      "symptoms": [
+        "Larges plages brun-vert, d'aspect huileux, souvent en bord de feuille.",
+        "Par temps humide, feutrage blanc au revers de la feuille.",
+        "Taches brunes et fermes sur les fruits.",
+        "Progression très rapide : un plant peut être détruit en quelques jours."
+      ],
+      "confusions": [
+        "Alternariose, plus lente et marquée d'anneaux concentriques.",
+        "Brûlure due au soleil, limitée aux parties exposées."
+      ],
+      "culturalPractices": [
+        "Agir vite : c'est la maladie la plus rapide de la liste.",
+        "Arracher et sortir de la parcelle les plants fortement atteints.",
+        "Éviter tout arrosage sur le feuillage.",
+        "Ne pas composter les résidus atteints."
+      ],
+      "chemicalTreatment": [
+        "En préventif : mancozèbe ou cuivre, renouvelés après chaque pluie.",
+        "En présence de symptômes : produit systémique à base de métalaxyl-M associé au mancozèbe, ou cymoxanil.",
+        "Alterner les familles de produits : le mildiou développe des résistances rapidement.",
+        "Traiter tôt le matin, jamais sous forte chaleur.",
+        "Respecter strictement la dose et le délai avant récolte indiqués sur l'étiquette du produit homologué dans votre pays."
+      ],
+      "prevention": [
+        "Espacer largement les plants, tuteurer, aérer.",
+        "Éviter les plantations en zone humide et ombragée.",
+        "Surveiller après chaque période fraîche et pluvieuse, conditions qui déclenchent l'épidémie."
+      ],
+      "whenToConsult": "Immédiatement. Le mildiou ne s'arrête pas seul et se propage aux parcelles voisines.",
+      "note": "Maladie la plus destructrice de la tomate : la rapidité de réaction compte plus que le produit choisi.",
+      "source": null
+    },
+    {
+      "id": "tomate_cladosporiose",
+      "modelLabel": "Tomato___Leaf_Mold",
+      "crop": "tomate",
+      "name": "Cladosporiose",
+      "severity": "moyenne",
+      "symptoms": [
+        "Taches jaunes diffuses sur le dessus de la feuille.",
+        "Au revers, exactement en face, un feutrage brun-olive.",
+        "Feuilles qui se recroquevillent puis sèchent."
+      ],
+      "confusions": [
+        "Mildiou, dont le feutrage est blanc et non brun-olive.",
+        "Carence en magnésium, qui jaunit entre les nervures sans feutrage."
+      ],
+      "culturalPractices": [
+        "Retirer les feuilles atteintes.",
+        "Aérer fortement : la maladie s'installe dans l'air confiné et humide.",
+        "Réduire l'humidité, notamment sous abri."
+      ],
+      "chemicalTreatment": [
+        "Fongicides à base de mancozèbe, difénoconazole ou azoxystrobine.",
+        "Traiter en visant le revers des feuilles, où se développe le champignon.",
+        "Respecter strictement la dose et le délai avant récolte indiqués sur l'étiquette du produit homologué dans votre pays."
+      ],
+      "prevention": [
+        "Espacement large, taille des feuilles basses.",
+        "Variétés résistantes si disponibles.",
+        "Éviter les arrosages tardifs en fin de journée."
+      ],
+      "whenToConsult": "Si l'attaque persiste malgré l'aération.",
+      "note": null,
+      "source": null
+    },
+    {
+      "id": "tomate_septoriose",
+      "modelLabel": "Tomato___Septoria_leaf_spot",
+      "crop": "tomate",
+      "name": "Septoriose",
+      "severity": "moyenne",
+      "symptoms": [
+        "Nombreuses petites taches rondes, centre gris clair, bordure brune.",
+        "Fines ponctuations noires au centre des taches.",
+        "Démarre sur les feuilles basses, très nombreuses taches sur une même feuille."
+      ],
+      "confusions": [
+        "Bactériose, aux taches plus sombres et huileuses.",
+        "Alternariose, aux taches plus grandes et annelées."
+      ],
+      "culturalPractices": [
+        "Retirer les feuilles basses atteintes.",
+        "Pailler pour limiter les éclaboussures depuis le sol.",
+        "Arroser au pied."
+      ],
+      "chemicalTreatment": [
+        "Fongicides de contact à base de mancozèbe ou de chlorothalonil.",
+        "Fongicides systémiques : difénoconazole, en alternance.",
+        "Commencer dès les premières taches : un traitement tardif ne récupère pas les feuilles perdues.",
+        "Respecter strictement la dose et le délai avant récolte indiqués sur l'étiquette du produit homologué dans votre pays."
+      ],
+      "prevention": [
+        "Rotation de deux ans minimum.",
+        "Éliminer soigneusement les débris de culture.",
+        "Désherber : certaines adventices hébergent le champignon."
+      ],
+      "whenToConsult": "Si le feuillage se dégarnit au point d'exposer les fruits au soleil.",
+      "note": null,
+      "source": null
+    },
+    {
+      "id": "tomate_acariens",
+      "modelLabel": "Tomato___Spider_mites Two-spotted_spider_mite",
+      "crop": "tomate",
+      "name": "Acariens (tétranyque tisserand)",
+      "severity": "moyenne",
+      "symptoms": [
+        "Piqueté très fin, jaune puis bronzé, réparti sur le limbe.",
+        "Aspect terne et poussiéreux de la feuille.",
+        "Fines toiles au revers et aux aisselles, visibles à contre-jour."
+      ],
+      "confusions": [
+        "Thrips, qui donnent aussi un piqueté argenté mais sans toile.",
+        "Carence, qui jaunit de façon uniforme et non en piqueté."
+      ],
+      "culturalPractices": [
+        "Ce n'est pas un champignon : un fongicide serait inutile.",
+        "Doucher le revers des feuilles à l'eau : les acariens supportent mal l'humidité.",
+        "Retirer les feuilles très atteintes."
+      ],
+      "chemicalTreatment": [
+        "Soufre mouillable, huile de neem ou savon insecticide, en visant le revers des feuilles.",
+        "Acaricides homologués (par exemple à base d'abamectine) en cas de forte pullulation.",
+        "Éviter absolument les insecticides à large spectre : ils tuent les prédateurs naturels et font exploser la population d'acariens.",
+        "Respecter strictement la dose et le délai avant récolte indiqués sur l'étiquette du produit homologué dans votre pays."
+      ],
+      "prevention": [
+        "Éviter le stress hydrique, qui favorise les pullulations.",
+        "Préserver les prédateurs naturels."
+      ],
+      "whenToConsult": "En cas de pullulation générale sur la parcelle.",
+      "note": "C'est un ravageur, pas une maladie.",
+      "source": null
+    },
+    {
+      "id": "tomate_corynesporiose",
+      "modelLabel": "Tomato___Target_Spot",
+      "crop": "tomate",
+      "name": "Corynesporiose",
+      "severity": "moyenne",
+      "symptoms": [
+        "Petites taches brunes à centre clair, parfois faiblement annelées.",
+        "Présentes sur feuilles, tiges et fruits.",
+        "Les taches peuvent se rejoindre et dessécher la feuille."
+      ],
+      "confusions": [
+        "Alternariose, dont les taches sont plus grandes et nettement annelées.",
+        "Septoriose, aux taches plus petites et régulières."
+      ],
+      "culturalPractices": [
+        "Retirer les organes atteints.",
+        "Aérer le feuillage, éviter les densités élevées.",
+        "Arroser au pied."
+      ],
+      "chemicalTreatment": [
+        "Fongicides à base de mancozèbe, azoxystrobine ou difénoconazole.",
+        "Alterner les familles pour limiter les résistances.",
+        "Respecter strictement la dose et le délai avant récolte indiqués sur l'étiquette du produit homologué dans votre pays."
+      ],
+      "prevention": [
+        "Rotation, élimination des débris.",
+        "Éviter l'humidité stagnante sur le feuillage."
+      ],
+      "whenToConsult": "Si les fruits sont touchés.",
+      "note": null,
+      "source": null
+    },
+    {
+      "id": "tomate_tylcv",
+      "modelLabel": "Tomato___Tomato_Yellow_Leaf_Curl_Virus",
+      "crop": "tomate",
+      "name": "Virus des feuilles jaunes en cuillère",
+      "severity": "élevée",
+      "symptoms": [
+        "Jeunes feuilles enroulées vers le haut, en cuillère.",
+        "Jaunissement des bords du limbe, feuilles épaissies et cassantes.",
+        "Plant rabougri, arrêt de croissance, très peu de fruits."
+      ],
+      "confusions": [
+        "Carence, qui ne rabougrit pas le plant entier.",
+        "Dégâts d'herbicide, qui déforment sans jaunir les bords."
+      ],
+      "culturalPractices": [
+        "Arracher et sortir les plants atteints : ils ne produiront pas et servent de réservoir.",
+        "Surveiller le revers des feuilles pour détecter les mouches blanches.",
+        "Poser des pièges collants jaunes pour suivre les populations."
+      ],
+      "chemicalTreatment": [
+        "Aucun produit ne soigne un virus : ne traitez pas la plante, traitez l'insecte.",
+        "Insecticides homologués contre les aleurodes, ou huile de neem, ou savon insecticide.",
+        "Traiter le revers des feuilles, où se tiennent les mouches blanches.",
+        "Respecter strictement la dose et le délai avant récolte indiqués sur l'étiquette du produit homologué dans votre pays."
+      ],
+      "prevention": [
+        "Plants sains à la plantation, protégés sous filet en pépinière.",
+        "Variétés résistantes, largement disponibles.",
+        "Désherber les abords, réservoirs de mouches blanches."
+      ],
+      "whenToConsult": "Dès les premiers plants touchés : la propagation est rapide.",
+      "note": "Un virus ne se traite pas. Agir sur l'insecte vecteur est la seule voie.",
+      "source": null
+    },
+    {
+      "id": "tomate_mosaique",
+      "modelLabel": "Tomato___Tomato_mosaic_virus",
+      "crop": "tomate",
+      "name": "Virus de la mosaïque de la tomate",
+      "severity": "élevée",
+      "symptoms": [
+        "Mosaïque de vert clair et vert foncé sur le limbe.",
+        "Feuilles parfois étroites, filiformes, déformées.",
+        "Croissance ralentie, fruits marbrés ou déformés."
+      ],
+      "confusions": [
+        "Carence, qui jaunit sans dessiner de mosaïque.",
+        "Virus des feuilles jaunes, qui enroule les feuilles en cuillère."
+      ],
+      "culturalPractices": [
+        "Arracher les plants atteints.",
+        "Se laver les mains et nettoyer les outils : ce virus se transmet par simple contact.",
+        "Ne pas fumer ni manipuler de tabac avant de toucher les plants."
+      ],
+      "chemicalTreatment": [
+        "Aucun traitement chimique n'existe contre ce virus, et il n'a pas d'insecte vecteur.",
+        "Tout repose sur l'hygiène : mains, outils, tuteurs.",
+        "Désinfection des outils à l'eau de Javel diluée ou à l'alcool entre deux plants."
+      ],
+      "prevention": [
+        "Semences saines.",
+        "Désinfection des outils et des tuteurs entre deux cultures.",
+        "Variétés résistantes."
+      ],
+      "whenToConsult": "Dès la première suspicion.",
+      "note": "Très contagieux par contact : l'hygiène des mains et des outils est la mesure principale.",
+      "source": null
+    },
+    {
+      "id": "tomate_sain",
+      "modelLabel": "Tomato___healthy",
+      "crop": "tomate",
+      "name": "Plant de tomate sain",
+      "severity": "aucune",
+      "symptoms": [
+        "Feuillage vert franc, sans taches ni déformation.",
+        "Croissance régulière, port dressé."
+      ],
+      "confusions": [],
+      "culturalPractices": [
+        "Poursuivre la surveillance, en particulier après les pluies.",
+        "Inspecter le revers des feuilles, où beaucoup de problèmes commencent."
+      ],
+      "chemicalTreatment": [
+        "Aucun traitement n'est justifié sur un plant sain. Traiter par précaution coûte de l'argent, pollue et favorise les résistances."
+      ],
+      "prevention": [
+        "Maintenir l'aération et l'arrosage au pied."
+      ],
+      "whenToConsult": "Aucune action nécessaire.",
+      "note": null,
+      "source": null
+    },
+    {
+      "id": "mais_cercosporiose",
+      "modelLabel": "Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot",
+      "crop": "maïs",
+      "name": "Cercosporiose (taches grises)",
+      "severity": "élevée",
+      "symptoms": [
+        "Lésions allongées, rectangulaires, gris clair à beige.",
+        "Bords nets, arrêtés par les nervures, ce qui leur donne une forme droite.",
+        "Démarre sur les feuilles basses et remonte vers l'épi."
+      ],
+      "confusions": [
+        "Helminthosporiose, dont les lésions sont fusiformes et non rectangulaires.",
+        "Brûlure physiologique, sans forme régulière."
+      ],
+      "culturalPractices": [
+        "Enfouir ou retirer les résidus de la culture précédente, où le champignon se conserve.",
+        "Éviter les semis trop denses qui gardent l'humidité."
+      ],
+      "chemicalTreatment": [
+        "Fongicides à base d'azoxystrobine, de pyraclostrobine ou de propiconazole.",
+        "Le traitement n'est rentable que s'il est appliqué avant que la maladie n'atteigne la feuille de l'épi.",
+        "Respecter strictement la dose et le délai avant récolte indiqués sur l'étiquette du produit homologué dans votre pays."
+      ],
+      "prevention": [
+        "Rotation avec une culture non céréalière.",
+        "Variétés tolérantes.",
+        "Éviter la monoculture de maïs sur la même parcelle."
+      ],
+      "whenToConsult": "Si les lésions atteignent la feuille de l'épi avant la maturité : la perte de rendement devient importante.",
+      "note": null,
+      "source": null
+    },
+    {
+      "id": "mais_rouille",
+      "modelLabel": "Corn_(maize)___Common_rust_",
+      "crop": "maïs",
+      "name": "Rouille commune",
+      "severity": "moyenne",
+      "symptoms": [
+        "Petites pustules poudreuses brun-rouge, sur les deux faces de la feuille.",
+        "La poudre tache les doigts quand on frotte la feuille.",
+        "En attaque forte, les pustules se rejoignent et la feuille sèche."
+      ],
+      "confusions": [
+        "Cercosporiose, qui donne des lésions plates et non des pustules en relief.",
+        "Dégâts d'insectes piqueurs, sans poudre colorée."
+      ],
+      "culturalPractices": [
+        "Surveiller sans précipitation : une attaque modérée après floraison pèse peu sur le rendement.",
+        "Éliminer les repousses de maïs entre deux cycles."
+      ],
+      "chemicalTreatment": [
+        "Fongicides à base d'azoxystrobine, de propiconazole ou de mancozèbe.",
+        "Un traitement n'est généralement justifié que si l'attaque est forte avant la floraison.",
+        "Respecter strictement la dose et le délai avant récolte indiqués sur l'étiquette du produit homologué dans votre pays."
+      ],
+      "prevention": [
+        "Variétés tolérantes.",
+        "Semis précoce pour que la floraison précède la période favorable au champignon."
+      ],
+      "whenToConsult": "Si les pustules apparaissent avant la floraison et couvrent les feuilles hautes.",
+      "note": null,
+      "source": null
+    },
+    {
+      "id": "mais_helminthosporiose",
+      "modelLabel": "Corn_(maize)___Northern_Leaf_Blight",
+      "crop": "maïs",
+      "name": "Helminthosporiose",
+      "severity": "élevée",
+      "symptoms": [
+        "Grandes lésions allongées en forme de cigare, gris-vert puis brunes.",
+        "Lésions longues de plusieurs centimètres, aux extrémités effilées.",
+        "Démarre en bas du plant et progresse vers le haut."
+      ],
+      "confusions": [
+        "Cercosporiose, aux lésions rectangulaires à bords droits.",
+        "Dégâts de grêle ou de vent, sans progression régulière."
+      ],
+      "culturalPractices": [
+        "Retirer ou enfouir les résidus de culture.",
+        "Aérer le peuplement, éviter les densités excessives."
+      ],
+      "chemicalTreatment": [
+        "Fongicides à base d'azoxystrobine, de propiconazole ou de mancozèbe.",
+        "Intervenir dès l'apparition des lésions sur les feuilles situées sous l'épi.",
+        "Respecter strictement la dose et le délai avant récolte indiqués sur l'étiquette du produit homologué dans votre pays."
+      ],
+      "prevention": [
+        "Rotation d'au moins un an avec une culture non céréalière.",
+        "Variétés résistantes, largement disponibles.",
+        "Éviter les semis trop tardifs en saison humide."
+      ],
+      "whenToConsult": "Si les lésions gagnent les feuilles situées au-dessus de l'épi avant la maturité.",
+      "note": null,
+      "source": null
+    },
+    {
+      "id": "mais_sain",
+      "modelLabel": "Corn_(maize)___healthy",
+      "crop": "maïs",
+      "name": "Plant de maïs sain",
+      "severity": "aucune",
+      "symptoms": [
+        "Feuilles vert franc, sans lésion ni pustule.",
+        "Port dressé, croissance régulière."
+      ],
+      "confusions": [],
+      "culturalPractices": [
+        "Poursuivre la surveillance, surtout entre la montaison et la floraison.",
+        "Inspecter les feuilles situées autour de l'épi, les plus déterminantes pour le rendement."
+      ],
+      "chemicalTreatment": [
+        "Aucun traitement n'est justifié sur un plant sain."
+      ],
+      "prevention": [
+        "Maintenir la rotation et la densité de semis adaptée."
+      ],
+      "whenToConsult": "Aucune action nécessaire.",
+      "note": null,
+      "source": null
+    }
+  ]
+}
