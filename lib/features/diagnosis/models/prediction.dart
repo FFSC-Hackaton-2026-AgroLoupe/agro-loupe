@@ -19,6 +19,13 @@ class Prediction {
   /// Pourcentage arrondi, prêt à être affiché.
   int get percent => (confidence * 100).round();
 
+  Map<String, Object?> toJson() => {'label': label, 'confidence': confidence};
+
+  factory Prediction.fromJson(Map<String, Object?> json) => Prediction(
+    label: json['label']! as String,
+    confidence: (json['confidence']! as num).toDouble(),
+  );
+
   @override
   String toString() => '$label ($percent%)';
 }

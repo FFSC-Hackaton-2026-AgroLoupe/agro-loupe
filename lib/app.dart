@@ -3,16 +3,25 @@ import 'package:provider/provider.dart';
 
 import 'core/constants/app_constants.dart';
 import 'core/services/connectivity_service.dart';
+import 'core/services/photo_service.dart';
 import 'core/theme/app_theme.dart';
+import 'features/diagnosis/data/classifier_service.dart';
+import 'features/diagnosis/data/diagnosis_repository.dart';
+import 'features/diagnosis/state/diagnosis_provider.dart';
 import 'features/diagnosis/ui/screens/home_screen.dart';
 
 /// Racine de l'application : injection des dépendances, puis thème et écrans.
 class AgroLoupeApp extends StatelessWidget {
-  const AgroLoupeApp({super.key, this.connectivityService});
+  const AgroLoupeApp({
+    super.key,
+    this.connectivityService,
+    this.diagnosisRepository,
+  });
 
-  /// Permet aux tests de fournir un service simulé. En production, laisser
-  /// `null` : l'application crée elle-même l'instance réelle.
+  /// Permettent aux tests de fournir des doublures. En production, laisser
+  /// `null` : l'application crée elle-même les instances réelles.
   final ConnectivityService? connectivityService;
+  final DiagnosisRepository? diagnosisRepository;
 
   @override
   Widget build(BuildContext context) {
@@ -21,6 +30,12 @@ class AgroLoupeApp extends StatelessWidget {
         // 1. Services transverses (une seule instance pour toute l'application).
         Provider<ConnectivityService>(
           create: (_) => connectivityService ?? ConnectivityService(),
+        ),
+        Provider<PhotoService>(create: (_) => PhotoService()),
+        Provider<ClassifierService>(
+          create: (_) => ClassifierService(),
+          // Libère les interpréteurs natifs à la fermeture.
+          dispose: (_, service) => service.close(),
         ),
 
         // 2. Flux dérivés d'un service, lus directement par l'interface.
@@ -32,8 +47,17 @@ class AgroLoupeApp extends StatelessWidget {
           initialData: ConnectionStatus.online,
         ),
 
-        // 3. Repositories et états des fonctionnalités : à ajouter ici au fur
-        //    et à mesure (diagnosis, treatments, history).
+        // 3. Repositories : ils orchestrent les services.
+        ProxyProvider2<ClassifierService, PhotoService, DiagnosisRepository>(
+          update: (_, classifier, photos, _) =>
+              diagnosisRepository ?? DiagnosisRepository(classifier, photos),
+        ),
+
+        // 4. États d'écran.
+        ChangeNotifierProvider<DiagnosisProvider>(
+          create: (context) =>
+              DiagnosisProvider(context.read<DiagnosisRepository>()),
+        ),
       ],
       child: MaterialApp(
         title: AppConstants.appName,

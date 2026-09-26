@@ -15,6 +15,7 @@ class CropProfile {
     required this.labelsAsset,
     required this.labelPrefix,
     required this.hasUnknownClass,
+    required this.imageAsset,
     this.inputSize = AppConstants.modelInputSize,
   });
 
@@ -44,6 +45,14 @@ class CropProfile {
   /// l'interface doit faire confirmer le résultat par l'utilisateur.
   final bool hasUnknownClass;
 
+  /// Photo de la culture, affichée dans le sélecteur.
+  ///
+  /// On y montre le produit récolté — tubercules, fruits, épi — plutôt que la
+  /// feuille : c'est à cela qu'un producteur reconnaît sa culture d'un coup
+  /// d'œil, sans avoir à lire. La consigne de photographier une feuille est
+  /// donnée juste en dessous, à l'étape suivante.
+  final String imageAsset;
+
   /// Côté du carré attendu en entrée, en pixels.
   final int inputSize;
 
@@ -57,6 +66,7 @@ class CropProfile {
     labelsAsset: AppConstants.cassavaLabelsAsset,
     labelPrefix: null,
     hasUnknownClass: true,
+    imageAsset: 'assets/images/manioc.jpg',
   );
 
   static const CropProfile tomato = CropProfile(
@@ -66,6 +76,7 @@ class CropProfile {
     labelsAsset: AppConstants.plantVillageLabelsAsset,
     labelPrefix: 'Tomato',
     hasUnknownClass: false,
+    imageAsset: 'assets/images/tomate.jpg',
   );
 
   static const CropProfile maize = CropProfile(
@@ -75,6 +86,7 @@ class CropProfile {
     labelsAsset: AppConstants.plantVillageLabelsAsset,
     labelPrefix: 'Corn_',
     hasUnknownClass: false,
+    imageAsset: 'assets/images/mais.jpg',
   );
 
   static CropProfile of(Crop crop) =>

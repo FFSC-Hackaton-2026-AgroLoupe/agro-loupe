@@ -41,11 +41,10 @@ abstract final class AppConstants {
   /// Logo pour fond sombre : même dessin, tracé en bleu clair.
   static const String logoOnDarkAsset = 'assets/images/logo_on_dark.png';
 
-  /// Illustration de l'écran de connexion (1080 × 1350).
+  /// Photographie d'accueil (1080 × 1350) : un producteur et sa récolte.
   ///
   /// Le master pleine résolution est dans `design/sources/`, hors APK.
-  static const String loginBackgroundAsset =
-      'assets/images/login_background.jpg';
+  static const String heroImageAsset = 'assets/images/hero_farmer.jpg';
 
   /// Collection Firestore des fiches de traitement (lecture seule).
   static const String treatmentsCollection = 'treatments';
