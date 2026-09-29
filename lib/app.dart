@@ -8,7 +8,7 @@ import 'core/theme/app_theme.dart';
 import 'features/diagnosis/data/classifier_service.dart';
 import 'features/diagnosis/data/diagnosis_repository.dart';
 import 'features/diagnosis/state/diagnosis_provider.dart';
-import 'features/diagnosis/ui/screens/home_screen.dart';
+import 'features/shell/ui/screens/app_shell.dart';
 import 'features/treatments/data/treatment_repository.dart';
 import 'features/treatments/state/treatment_provider.dart';
 
@@ -77,7 +77,7 @@ class AgroLoupeApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         theme: AppTheme.light,
         darkTheme: AppTheme.dark,
-        home: const HomeScreen(),
+        home: const AppShell(),
       ),
     );
   }

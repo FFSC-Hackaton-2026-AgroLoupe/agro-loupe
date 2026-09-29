@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -68,37 +70,56 @@ class _Body extends StatelessWidget {
 }
 
 /// Point de départ : on choisit sa culture, puis on photographie.
-/// Point de départ : on choisit sa culture, puis on photographie.
-/// Point de départ : on choisit sa culture, puis on photographie.
 class _Start extends StatelessWidget {
   const _Start();
+
+  /// Hauteur en dessous de laquelle la consigne posée sur la photo ne tient
+  /// plus. Mesurée : le titre et ses deux lignes débordaient à 60 px.
+  static const double _hauteurMiniHero = 200;
+
+  /// Place occupée par le sélecteur de culture, les deux boutons et les
+  /// espacements. Approximation : si elle est fausse, la page défile un peu,
+  /// elle ne déborde jamais.
+  static const double _placeDuReste = 300;
 
   @override
   Widget build(BuildContext context) {
     final provider = context.read<DiagnosisProvider>();
 
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const CropSelector(),
-          const SizedBox(height: 20),
-          const Expanded(child: _Hero()),
-          const SizedBox(height: 20),
-          FilledButton.icon(
-            onPressed: () => provider.analyze(PhotoSource.camera),
-            icon: const Icon(Icons.photo_camera_outlined),
-            label: const Text('Prendre une photo'),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // La photo prend la place restante, sans jamais descendre sous une
+        // hauteur lisible. Sur un écran trop court, c'est la page qui défile
+        // plutôt que la consigne qui se fait rogner.
+        final hauteurHero = math.max(
+          _hauteurMiniHero,
+          constraints.maxHeight - _placeDuReste,
+        );
+
+        return SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const CropSelector(),
+              const SizedBox(height: 20),
+              SizedBox(height: hauteurHero, child: const _Hero()),
+              const SizedBox(height: 20),
+              FilledButton.icon(
+                onPressed: () => provider.analyze(PhotoSource.camera),
+                icon: const Icon(Icons.photo_camera_outlined),
+                label: const Text('Prendre une photo'),
+              ),
+              const SizedBox(height: 4),
+              TextButton.icon(
+                onPressed: () => provider.analyze(PhotoSource.gallery),
+                icon: const Icon(Icons.photo_library_outlined),
+                label: const Text('Choisir dans la galerie'),
+              ),
+            ],
           ),
-          const SizedBox(height: 4),
-          TextButton.icon(
-            onPressed: () => provider.analyze(PhotoSource.gallery),
-            icon: const Icon(Icons.photo_library_outlined),
-            label: const Text('Choisir dans la galerie'),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

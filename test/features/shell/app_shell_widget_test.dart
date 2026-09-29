@@ -1,0 +1,68 @@
+import 'package:agro_loupe/app.dart';
+import 'package:agro_loupe/core/services/connectivity_service.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
+
+class _MockConnectivityService extends Mock implements ConnectivityService {}
+
+/// Repères pris dans le corps des écrans, pas sur les libellés de la barre :
+/// une fois un onglet ouvert, son nom apparaît deux fois — dans la barre et
+/// dans le titre — et l'assertion deviendrait ambiguë.
+const _accueil = 'Photographiez une feuille';
+const _catalogue = 'Les maladies, culture par culture';
+const _historique = 'Vos diagnostics passés';
+
+void main() {
+  late _MockConnectivityService connectivity;
+
+  setUp(() {
+    connectivity = _MockConnectivityService();
+    when(
+      () => connectivity.onStatusChanged,
+    ).thenAnswer((_) => const Stream<ConnectionStatus>.empty());
+  });
+
+  Future<void> pumpApp(WidgetTester tester) async {
+    await tester.pumpWidget(AgroLoupeApp(connectivityService: connectivity));
+    await tester.pump();
+  }
+
+  testWidgets('les trois onglets sont accessibles', (tester) async {
+    await pumpApp(tester);
+
+    // Le diagnostic est l'onglet d'accueil : c'est la promesse du produit.
+    expect(find.text(_accueil), findsOneWidget);
+
+    await tester.tap(find.byIcon(Icons.menu_book_outlined));
+    await tester.pumpAndSettle();
+    expect(find.text(_catalogue), findsOneWidget);
+    expect(find.text(_accueil), findsNothing);
+
+    await tester.tap(find.byIcon(Icons.history_outlined));
+    await tester.pumpAndSettle();
+    expect(find.text(_historique), findsOneWidget);
+
+    await tester.tap(find.byIcon(Icons.eco_outlined));
+    await tester.pumpAndSettle();
+    expect(find.text(_accueil), findsOneWidget);
+  });
+
+  testWidgets('le retour depuis un autre onglet ramène au diagnostic', (
+    tester,
+  ) async {
+    await pumpApp(tester);
+
+    await tester.tap(find.byIcon(Icons.menu_book_outlined));
+    await tester.pumpAndSettle();
+    expect(find.text(_catalogue), findsOneWidget);
+
+    // Bouton retour du téléphone : il doit revenir au diagnostic plutôt que
+    // de quitter l'application.
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+
+    expect(find.text(_accueil), findsOneWidget);
+    expect(find.text(_catalogue), findsNothing);
+  });
+}

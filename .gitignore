@@ -51,3 +51,6 @@ tools/_savedmodel/
 # Le modele sans secret, .env.example, est versionne a sa place.
 .env
 .env.local
+
+# Photos servant aux essais du deuxieme avis : jamais dans le depot public.
+tools/photos_test/
