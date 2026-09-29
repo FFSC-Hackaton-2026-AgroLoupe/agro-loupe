@@ -36,13 +36,33 @@ class TreatmentProvider extends ChangeNotifier {
   TreatmentsState _state = const TreatmentsLoading();
   TreatmentsState get state => _state;
 
+  /// Charge les fiches embarquées, puis cherche des corrections.
+  ///
+  /// L'affichage n'attend **jamais** le réseau : l'état passe à
+  /// [TreatmentsReady] dès que le fichier local est lu, et la recherche de
+  /// corrections se poursuit ensuite sans bloquer. Si elle aboutit, les
+  /// fiches sont simplement remplacées à l'écran ; si elle échoue, rien ne
+  /// se passe et personne ne s'en aperçoit.
   Future<void> load() async {
     try {
       final byLabel = await _repository.loadAll();
       _state = TreatmentsReady(byLabel);
+      notifyListeners();
     } on AppException catch (error) {
       _state = TreatmentsError(error.userMessage);
+      notifyListeners();
+      return;
     }
+
+    await _chercherCorrections();
+  }
+
+  Future<void> _chercherCorrections() async {
+    final corrigees = await _repository.fetchCorrections();
+    // `null` est le cas courant : hors connexion, ou rien de neuf.
+    if (corrigees == null) return;
+
+    _state = TreatmentsReady(corrigees);
     notifyListeners();
   }
 

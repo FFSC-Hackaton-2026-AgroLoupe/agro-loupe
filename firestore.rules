@@ -1,0 +1,37 @@
+rules_version = '2';
+
+// Règles de sécurité Firestore d'AgroLoupe.
+//
+// Le dépôt est public et l'application n'a pas de comptes utilisateurs :
+// tout ce qui est autorisé ici l'est pour n'importe qui sur internet. La
+// règle est donc « lecture seule, sur une seule collection, et rien d'autre ».
+//
+// Jamais de mode test : `allow read, write: if true` ouvrirait la base à
+// l'écriture par quiconque a lu le dépôt et trouvé l'identifiant du projet,
+// qui n'est pas un secret.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Le catalogue des fiches de traitement.
+    //
+    // Lecture publique assumée : ce sont des conseils agronomiques destinés à
+    // être diffusés, ils ne contiennent aucune donnée personnelle.
+    //
+    // Écriture refusée, sans exception. Les fiches sont injectées depuis un
+    // poste d'administration, jamais depuis l'application : une fiche
+    // conseille des produits phytosanitaires, et sa modification ne peut pas
+    // dépendre d'un client qu'on ne contrôle pas.
+    match /catalogue/{document} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // Tout le reste est fermé, y compris les collections qui n'existent pas
+    // encore. Une collection ajoutée plus tard sera donc inaccessible tant
+    // que ces règles ne l'auront pas explicitement autorisée — l'oubli va
+    // dans le sens de la fermeture.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
