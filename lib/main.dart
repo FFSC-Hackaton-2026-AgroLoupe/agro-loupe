@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 
 import 'app.dart';
+import 'core/config/ai_config.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Accès en ligne aux modèles, optionnel : si `.env` manque, l'application
+  // démarre quand même et le diagnostic hors-ligne reste entier.
+  await AiConfig.load();
 
   // Firebase sera initialisé ici une fois `flutterfire configure` exécuté :
   //   await Firebase.initializeApp(

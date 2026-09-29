@@ -34,6 +34,11 @@ dependencies:
   # État de la connexion
   connectivity_plus: ^7.3.1
 
+  # Clés d'API en développement, lues depuis .env (jamais commité).
+  # Temporaire : à remplacer par Firebase AI Logic avant toute diffusion,
+  # un .env est embarqué dans l'APK et s'en extrait en clair.
+  flutter_dotenv: ^6.0.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -47,3 +52,4 @@ flutter:
     - assets/models/
     - assets/images/
     - assets/data/
+    - .env

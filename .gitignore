@@ -46,3 +46,8 @@ app.*.map.json
 CLAUDE.md
 # SavedModel TensorFlow : matiere premiere de la conversion, jamais embarquee
 tools/_savedmodel/
+
+# Cles d'API en developpement : jamais dans le depot (il est public).
+# Le modele sans secret, .env.example, est versionne a sa place.
+.env
+.env.local
