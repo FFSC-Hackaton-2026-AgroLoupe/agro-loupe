@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../shared/widgets/app_bar_title.dart';
+
 /// Historique local des diagnostics.
 ///
 /// Écran provisoire. À remplacer par la liste des diagnostics passés, du plus
@@ -17,7 +19,7 @@ class HistoryScreen extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Historique')),
+      appBar: AppBar(title: const AppBarTitle('Historique')),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 32),

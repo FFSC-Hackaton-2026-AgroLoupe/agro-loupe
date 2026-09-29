@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/services/photo_service.dart';
+import '../../../../shared/widgets/app_bar_title.dart';
 import '../../../../shared/widgets/connection_badge.dart';
 import '../../state/diagnosis_provider.dart';
 import '../widgets/crop_selector.dart';
@@ -33,7 +34,7 @@ class HomeScreen extends StatelessWidget {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: const Text(AppConstants.appName),
+          title: const AppBarTitle(AppConstants.appName),
           leading: peutRevenir
               ? IconButton(
                   icon: const Icon(Icons.arrow_back),

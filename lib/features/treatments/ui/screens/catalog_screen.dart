@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../shared/widgets/app_bar_title.dart';
+
 /// Catalogue des maladies, consultable sans passer par un diagnostic.
 ///
 /// Écran provisoire. À remplacer par la liste des maladies de la culture
@@ -18,7 +20,7 @@ class CatalogScreen extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Catalogue')),
+      appBar: AppBar(title: const AppBarTitle('Catalogue')),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 32),

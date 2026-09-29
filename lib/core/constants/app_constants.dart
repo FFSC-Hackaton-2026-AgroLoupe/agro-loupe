@@ -41,6 +41,15 @@ abstract final class AppConstants {
   /// Logo pour fond sombre : même dessin, tracé en bleu clair.
   static const String logoOnDarkAsset = 'assets/images/logo_on_dark.png';
 
+  /// Marque seule — loupe et feuille, sans le nom — pour les barres de titre.
+  ///
+  /// Découpée du logo complet : à côté d'un titre qui dit déjà « AgroLoupe »,
+  /// le logo entier afficherait le nom deux fois.
+  static const String iconAsset = 'assets/images/icon.png';
+
+  /// Variante éclaircie, pour un fond sombre.
+  static const String iconOnDarkAsset = 'assets/images/icon_on_dark.png';
+
   /// Photographie d'accueil (1080 × 1350) : un producteur et sa récolte.
   ///
   /// Le master pleine résolution est dans `design/sources/`, hors APK.
