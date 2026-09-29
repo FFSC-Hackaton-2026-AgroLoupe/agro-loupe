@@ -25,7 +25,11 @@ void main() {
   });
 
   Future<void> pumpApp(WidgetTester tester) async {
-    await tester.pumpWidget(AgroLoupeApp(connectivityService: connectivity));
+    await tester.pumpWidget(
+      // Sans cela, le voile du tutoriel se poserait par-dessus l'écran et
+      // avalerait les appuis : ces tests veulent l'application nue.
+      AgroLoupeApp(connectivityService: connectivity, showCoachMarks: false),
+    );
     await tester.pump();
   }
 
@@ -64,4 +68,31 @@ void main() {
     final button = tester.widget<FilledButton>(photoButton);
     expect(button.onPressed, isNotNull);
   });
+
+  // Les boutons sont l'action principale : les atteindre ne doit jamais
+  // demander de faire défiler l'écran. Une régression l'avait rendu
+  // nécessaire sur petit téléphone, sans qu'aucun test ne l'attrape.
+  for (final taille in const [
+    Size(320, 568), // petit téléphone
+    Size(360, 640), // entrée de gamme courant
+    Size(411, 731), // milieu de gamme
+  ]) {
+    testWidgets('les boutons restent visibles en ${taille.width.toInt()}'
+        'x${taille.height.toInt()}', (tester) async {
+      tester.view.physicalSize = taille;
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      await pumpApp(tester);
+
+      final bouton = tester.getRect(photoButton);
+      expect(
+        bouton.bottom,
+        lessThanOrEqualTo(taille.height),
+        reason: "le bouton dépasse le bas de l'écran",
+      );
+      expect(bouton.top, greaterThanOrEqualTo(0));
+      expect(find.text('Galerie'), findsOneWidget);
+    });
+  }
 }

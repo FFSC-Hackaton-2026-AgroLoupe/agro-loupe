@@ -11,6 +11,9 @@ import 'features/diagnosis/data/diagnosis_repository.dart';
 import 'features/diagnosis/data/second_opinion_service.dart';
 import 'features/diagnosis/state/diagnosis_provider.dart';
 import 'features/diagnosis/state/second_opinion_provider.dart';
+import 'features/onboarding/data/onboarding_storage.dart';
+import 'features/onboarding/state/coach_controller.dart';
+import 'features/onboarding/ui/screens/onboarding_screen.dart';
 import 'features/shell/ui/screens/app_shell.dart';
 import 'features/treatments/data/treatment_repository.dart';
 import 'features/treatments/state/treatment_provider.dart';
@@ -23,7 +26,15 @@ class AgroLoupeApp extends StatelessWidget {
     this.diagnosisRepository,
     this.treatmentRepository,
     this.secondOpinionService,
+    this.showOnboarding = false,
+    this.showCoachMarks = true,
   });
+
+  /// Affiche la présentation avant la coquille. Vrai au premier lancement.
+  final bool showOnboarding;
+
+  /// Affiche le tutoriel. Les tests le coupent pour atteindre l'application.
+  final bool showCoachMarks;
 
   /// Permettent aux tests de fournir des doublures. En production, laisser
   /// `null` : l'application crée elle-même les instances réelles.
@@ -78,6 +89,11 @@ class AgroLoupeApp extends StatelessWidget {
         // Sans configuration en ligne, le service reste `null` et
         // l'interface masque simplement le bouton : le diagnostic
         // hors-ligne, lui, ne depend de rien de tout cela.
+        // Relance du tutoriel : demandée depuis la barre de titre de
+        // l'accueil, exécutée par la coquille, qui porte le voile.
+        ChangeNotifierProvider<CoachController>(
+          create: (_) => CoachController(),
+        ),
         ChangeNotifierProvider<SecondOpinionProvider>(
           create: (_) =>
               SecondOpinionProvider(secondOpinionService ?? _serviceEnLigne()),
@@ -92,12 +108,15 @@ class AgroLoupeApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         theme: AppTheme.light,
         darkTheme: AppTheme.dark,
-        home: const AppShell(),
+        home: _Entree(
+          showOnboarding: showOnboarding,
+          showCoachMarks: showCoachMarks,
+        ),
       ),
     );
   }
 
-  /// Cree le service en ligne, ou `null` si `.env` ne le configure pas.
+  /// Crée le service en ligne, ou `null` si `.env` ne le configure pas.
   static SecondOpinionService? _serviceEnLigne() {
     if (!AiConfig.isConfigured) return null;
     return SecondOpinionService(
@@ -106,4 +125,34 @@ class AgroLoupeApp extends StatelessWidget {
       model: AiConfig.model,
     );
   }
+}
+
+/// Présentation au premier lancement, puis l'application.
+///
+/// Le passage de l'une à l'autre se fait sans redémarrage : la présentation
+/// n'est qu'un écran de plus, pas une étape de démarrage.
+class _Entree extends StatefulWidget {
+  const _Entree({required this.showOnboarding, required this.showCoachMarks});
+
+  final bool showOnboarding;
+  final bool showCoachMarks;
+
+  @override
+  State<_Entree> createState() => _EntreeState();
+}
+
+class _EntreeState extends State<_Entree> {
+  late bool _presentation = widget.showOnboarding;
+
+  void _termine() {
+    // On note d'abord, on bascule ensuite : si l'écriture échoue, la
+    // présentation réapparaîtra, ce qui est sans gravité.
+    const OnboardingStorage().markSeen();
+    setState(() => _presentation = false);
+  }
+
+  @override
+  Widget build(BuildContext context) => _presentation
+      ? OnboardingScreen(onDone: _termine)
+      : AppShell(coachMarks: widget.showCoachMarks);
 }

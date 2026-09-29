@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../onboarding/ui/coach_targets.dart';
 import '../../models/crop_profile.dart';
 import '../../state/diagnosis_provider.dart';
 
@@ -20,6 +21,7 @@ class CropSelector extends StatelessWidget {
     final selected = context.select<DiagnosisProvider, Crop>((p) => p.crop);
 
     return Column(
+      key: CoachTargets.cropSelector,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(

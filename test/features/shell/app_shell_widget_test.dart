@@ -24,7 +24,11 @@ void main() {
   });
 
   Future<void> pumpApp(WidgetTester tester) async {
-    await tester.pumpWidget(AgroLoupeApp(connectivityService: connectivity));
+    await tester.pumpWidget(
+      // Sans cela, le voile du tutoriel se poserait par-dessus l'écran et
+      // avalerait les appuis : ces tests veulent l'application nue.
+      AgroLoupeApp(connectivityService: connectivity, showCoachMarks: false),
+    );
     await tester.pump();
   }
 

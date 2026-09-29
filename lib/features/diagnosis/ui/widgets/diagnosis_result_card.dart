@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/theme/diagnosis_colors.dart';
+import '../../../onboarding/ui/coach_targets.dart';
 import '../../../treatments/models/treatment.dart';
 import '../../../treatments/state/treatment_provider.dart';
 import '../../../treatments/ui/widgets/treatment_sections.dart';
@@ -221,6 +222,7 @@ class _Confirmation extends StatelessWidget {
     final provider = context.read<DiagnosisProvider>();
 
     return Card(
+      key: CoachTargets.confirmation,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
