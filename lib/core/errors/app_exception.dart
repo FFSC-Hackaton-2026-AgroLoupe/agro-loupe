@@ -70,4 +70,23 @@ final class NetworkException extends AppException {
         'Reconnectez-vous une fois pour la consulter hors-ligne ensuite.',
         cause: cause,
       );
+
+  /// Le deuxième avis en ligne n'a pas abouti : réseau absent, trop lent,
+  /// ou service indisponible.
+  const NetworkException.secondOpinionUnavailable({Object? cause})
+    : this(
+        "Le deuxième avis n'a pas pu être obtenu. "
+        'Votre diagnostic hors-ligne reste disponible.',
+        cause: cause,
+      );
+
+  /// Le service a répondu, mais dans un format inattendu.
+  ///
+  /// Distinct du cas précédent : ici le réseau fonctionne, donc conseiller de
+  /// vérifier la connexion enverrait l'utilisateur sur une fausse piste.
+  const NetworkException.secondOpinionUnreadable({Object? cause})
+    : this(
+        "La réponse reçue n'était pas exploitable. Réessayez dans un moment.",
+        cause: cause,
+      );
 }

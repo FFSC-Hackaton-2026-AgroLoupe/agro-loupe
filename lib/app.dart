@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'core/config/ai_config.dart';
 import 'core/constants/app_constants.dart';
 import 'core/services/connectivity_service.dart';
 import 'core/services/photo_service.dart';
 import 'core/theme/app_theme.dart';
 import 'features/diagnosis/data/classifier_service.dart';
 import 'features/diagnosis/data/diagnosis_repository.dart';
+import 'features/diagnosis/data/second_opinion_service.dart';
 import 'features/diagnosis/state/diagnosis_provider.dart';
+import 'features/diagnosis/state/second_opinion_provider.dart';
 import 'features/shell/ui/screens/app_shell.dart';
 import 'features/treatments/data/treatment_repository.dart';
 import 'features/treatments/state/treatment_provider.dart';
@@ -19,6 +22,7 @@ class AgroLoupeApp extends StatelessWidget {
     this.connectivityService,
     this.diagnosisRepository,
     this.treatmentRepository,
+    this.secondOpinionService,
   });
 
   /// Permettent aux tests de fournir des doublures. En production, laisser
@@ -26,6 +30,10 @@ class AgroLoupeApp extends StatelessWidget {
   final ConnectivityService? connectivityService;
   final DiagnosisRepository? diagnosisRepository;
   final TreatmentRepository? treatmentRepository;
+
+  /// Deuxieme avis en ligne. `null` en production : l'application le construit
+  /// elle-meme a partir de [AiConfig], et s'en passe s'il n'est pas configure.
+  final SecondOpinionService? secondOpinionService;
 
   @override
   Widget build(BuildContext context) {
@@ -67,6 +75,13 @@ class AgroLoupeApp extends StatelessWidget {
         ),
         // Les fiches sont chargées dès le démarrage : le fichier est petit, et
         // une fiche doit s'afficher sans attente après un diagnostic.
+        // Sans configuration en ligne, le service reste `null` et
+        // l'interface masque simplement le bouton : le diagnostic
+        // hors-ligne, lui, ne depend de rien de tout cela.
+        ChangeNotifierProvider<SecondOpinionProvider>(
+          create: (_) =>
+              SecondOpinionProvider(secondOpinionService ?? _serviceEnLigne()),
+        ),
         ChangeNotifierProvider<TreatmentProvider>(
           create: (context) =>
               TreatmentProvider(context.read<TreatmentRepository>())..load(),
@@ -79,6 +94,16 @@ class AgroLoupeApp extends StatelessWidget {
         darkTheme: AppTheme.dark,
         home: const AppShell(),
       ),
+    );
+  }
+
+  /// Cree le service en ligne, ou `null` si `.env` ne le configure pas.
+  static SecondOpinionService? _serviceEnLigne() {
+    if (!AiConfig.isConfigured) return null;
+    return SecondOpinionService(
+      baseUrl: AiConfig.baseUrl,
+      apiKey: AiConfig.apiKey,
+      model: AiConfig.model,
     );
   }
 }

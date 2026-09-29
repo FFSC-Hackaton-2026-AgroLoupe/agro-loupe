@@ -10,7 +10,7 @@ class _MockConnectivityService extends Mock implements ConnectivityService {}
 /// `find.byType` échouerait, car il compare le type exact.
 final photoButton = find.byWidgetPredicate(
   (widget) => widget is FilledButton,
-  description: 'bouton « Prendre une photo »',
+  description: 'bouton « Photographier »',
 );
 
 void main() {
@@ -35,7 +35,7 @@ void main() {
     expect(find.text('AgroLoupe'), findsOneWidget);
     expect(find.text('Photographiez une feuille'), findsOneWidget);
     expect(photoButton, findsOneWidget);
-    expect(find.text('Prendre une photo'), findsOneWidget);
+    expect(find.text('Photographier'), findsOneWidget);
   });
 
   testWidgets('aucun bandeau hors-ligne tant que le réseau est là', (

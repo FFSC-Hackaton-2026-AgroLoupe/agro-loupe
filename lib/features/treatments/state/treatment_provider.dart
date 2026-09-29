@@ -51,4 +51,24 @@ class TreatmentProvider extends ChangeNotifier {
     TreatmentsReady(:final byLabel) => byLabel[label],
     _ => null,
   };
+
+  /// Fiches d'une culture, triées par nom.
+  ///
+  /// [crop] est la valeur telle qu'elle figure dans les fiches : `manioc`,
+  /// `tomate` ou `maïs`. La comparaison ignore la casse, pour accepter aussi
+  /// le nom affiché d'un `CropProfile`.
+  ///
+  /// Liste vide tant que les fiches ne sont pas chargées : un écran qui
+  /// n'affiche rien pendant un instant vaut mieux qu'un écran qui plante.
+  List<Treatment> forCrop(String crop) {
+    final state = _state;
+    if (state is! TreatmentsReady) return const [];
+
+    final recherche = crop.toLowerCase();
+    final fiches = state.byLabel.values
+        .where((fiche) => fiche.crop.toLowerCase() == recherche)
+        .toList();
+    fiches.sort((a, b) => a.name.compareTo(b.name));
+    return List.unmodifiable(fiches);
+  }
 }

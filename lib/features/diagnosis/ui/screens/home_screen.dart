@@ -9,6 +9,7 @@ import '../../../../shared/widgets/connection_badge.dart';
 import '../../state/diagnosis_provider.dart';
 import '../widgets/crop_selector.dart';
 import '../widgets/diagnosis_result_card.dart';
+import '../widgets/second_opinion_card.dart';
 
 /// Écran unique du diagnostic : choix de la culture, photo, résultat.
 class HomeScreen extends StatelessWidget {
@@ -63,7 +64,7 @@ class _Body extends StatelessWidget {
       DiagnosisAnalyzing() => const _Analyzing(),
       DiagnosisSuccess() => DiagnosisResultCard(state),
       DiagnosisConfirmed() => DiagnosisConfirmedCard(state),
-      DiagnosisExhausted() => const _Exhausted(),
+      DiagnosisExhausted() => _Exhausted(state),
       DiagnosisError(:final message) => _Failure(message: message),
     };
   }
@@ -84,8 +85,6 @@ class _Start extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final provider = context.read<DiagnosisProvider>();
-
     return LayoutBuilder(
       builder: (context, constraints) {
         // La photo prend la place restante, sans jamais descendre sous une
@@ -105,21 +104,52 @@ class _Start extends StatelessWidget {
               const SizedBox(height: 20),
               SizedBox(height: hauteurHero, child: const _Hero()),
               const SizedBox(height: 20),
-              FilledButton.icon(
-                onPressed: () => provider.analyze(PhotoSource.camera),
-                icon: const Icon(Icons.photo_camera_outlined),
-                label: const Text('Prendre une photo'),
-              ),
-              const SizedBox(height: 4),
-              TextButton.icon(
-                onPressed: () => provider.analyze(PhotoSource.gallery),
-                icon: const Icon(Icons.photo_library_outlined),
-                label: const Text('Choisir dans la galerie'),
-              ),
+              const _Actions(),
             ],
           ),
         );
       },
+    );
+  }
+}
+
+/// Les deux façons de fournir une feuille, côte à côte.
+///
+/// L'appareil photo occupe plus de place que la galerie : au champ, c'est le
+/// geste attendu, la galerie n'étant qu'un repli. Les libellés sont courts
+/// pour tenir sur une seule ligne sur un écran de 360 dp, et la hauteur de
+/// 52 px donne une cible confortable à viser avec des mains sales.
+class _Actions extends StatelessWidget {
+  const _Actions();
+
+  static const Size _taille = Size.fromHeight(52);
+
+  @override
+  Widget build(BuildContext context) {
+    final provider = context.read<DiagnosisProvider>();
+
+    return Row(
+      children: [
+        Expanded(
+          flex: 3,
+          child: FilledButton.icon(
+            onPressed: () => provider.analyze(PhotoSource.camera),
+            style: FilledButton.styleFrom(minimumSize: _taille),
+            icon: const Icon(Icons.photo_camera_outlined),
+            label: const Text('Photographier'),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          flex: 2,
+          child: OutlinedButton.icon(
+            onPressed: () => provider.analyze(PhotoSource.gallery),
+            style: OutlinedButton.styleFrom(minimumSize: _taille),
+            icon: const Icon(Icons.photo_library_outlined),
+            label: const Text('Galerie'),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -218,18 +248,36 @@ class _Analyzing extends StatelessWidget {
 }
 
 /// Toutes les hypothèses ont été rejetées par l'utilisateur.
+///
+/// C'est le moment où le deuxième avis en ligne est le plus pertinent : le
+/// modèle embarqué vient d'échouer, et l'utilisateur le sait.
 class _Exhausted extends StatelessWidget {
-  const _Exhausted();
+  const _Exhausted(this.state);
+
+  final DiagnosisExhausted state;
 
   @override
   Widget build(BuildContext context) {
-    return _Message(
-      icon: Icons.help_outline,
-      title: "Nous n'avons pas pu identifier la maladie",
-      body:
-          'Reprenez la photo en plein jour, au plus près de la feuille. '
-          'Si le doute persiste, montrez le plant à un agent agricole.',
-      action: 'Recommencer',
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(vertical: 32),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const _Message(
+            icon: Icons.help_outline,
+            title: "Nous n'avons pas pu identifier la maladie",
+            body:
+                'Reprenez la photo en plein jour, au plus près de la feuille. '
+                'Si le doute persiste, montrez le plant à un agent agricole.',
+            action: 'Recommencer',
+          ),
+          const SizedBox(height: 24),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: SecondOpinionCard(state.diagnosis),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -272,6 +320,7 @@ class _Message extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 32),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: [
             Icon(icon, size: 64, color: theme.colorScheme.onSurfaceVariant),
             const SizedBox(height: 20),

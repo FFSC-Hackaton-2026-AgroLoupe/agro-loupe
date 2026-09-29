@@ -38,6 +38,7 @@ dependencies:
   # Temporaire : à remplacer par Firebase AI Logic avant toute diffusion,
   # un .env est embarqué dans l'APK et s'en extrait en clair.
   flutter_dotenv: ^6.0.1
+  dio: ^5.11.1
 
 dev_dependencies:
   flutter_test:
