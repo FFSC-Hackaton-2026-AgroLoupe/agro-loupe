@@ -180,7 +180,8 @@ void main() {
       await tester.tap(find.text('La bonne photo'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Une seule feuille dans la photo'), findsOneWidget);
+      expect(find.text('La photo décide du résultat'), findsOneWidget);
+      expect(find.text('Une seule feuille'), findsOneWidget);
     });
   });
 }
