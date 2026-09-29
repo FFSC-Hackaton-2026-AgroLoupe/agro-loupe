@@ -1,7 +1,13 @@
 import '../../../core/constants/app_constants.dart';
 
-/// Culture couverte par l'application.
-enum Crop { cassava, tomato, maize }
+/// Culture choisie par l'utilisateur.
+///
+/// [other] n'est pas une culture : c'est le choix « une autre culture », pour
+/// laquelle aucun modèle n'est embarqué. Gemini nomme alors la plante *et* le
+/// problème, ce qui évite une liste de cultures supplémentaires — il en
+/// manquerait toujours une — et un champ de saisie, que notre utilisateur
+/// cible remplit mal.
+enum Crop { cassava, tomato, maize, other }
 
 /// Décrit une culture et le modèle qui la diagnostique.
 ///
@@ -24,8 +30,13 @@ class CropProfile {
   /// Nom affiché à l'utilisateur.
   final String displayName;
 
-  final String modelAsset;
-  final String labelsAsset;
+  /// `null` pour une culture sans modèle embarqué : le diagnostic passe alors
+  /// entièrement par le service en ligne.
+  final String? modelAsset;
+  final String? labelsAsset;
+
+  /// Peut-on diagnostiquer cette culture hors connexion ?
+  bool get hasLocalModel => modelAsset != null && labelsAsset != null;
 
   /// Préfixe des étiquettes à retenir dans la sortie du modèle.
   ///
@@ -45,19 +56,23 @@ class CropProfile {
   /// l'interface doit faire confirmer le résultat par l'utilisateur.
   final bool hasUnknownClass;
 
-  /// Photo de la culture, affichée dans le sélecteur.
+  /// Photo de la culture, affichée dans le sélecteur. `null` quand il n'y a
+  /// pas de plante précise à montrer.
   ///
   /// On y montre le produit récolté — tubercules, fruits, épi — plutôt que la
   /// feuille : c'est à cela qu'un producteur reconnaît sa culture d'un coup
   /// d'œil, sans avoir à lire. La consigne de photographier une feuille est
   /// donnée juste en dessous, à l'étape suivante.
-  final String imageAsset;
+  final String? imageAsset;
 
   /// Côté du carré attendu en entrée, en pixels.
   final int inputSize;
 
-  /// Les trois cultures couvertes, et leur modèle respectif.
-  static const List<CropProfile> all = [cassava, tomato, maize];
+  /// Tous les choix proposés, y compris « une autre culture ».
+  static const List<CropProfile> all = [cassava, tomato, maize, other];
+
+  /// Les seules cultures diagnostiquables hors connexion.
+  static const List<CropProfile> withLocalModel = [cassava, tomato, maize];
 
   static const CropProfile cassava = CropProfile(
     crop: Crop.cassava,
@@ -87,6 +102,18 @@ class CropProfile {
     labelPrefix: 'Corn_',
     hasUnknownClass: false,
     imageAsset: 'assets/images/mais.jpg',
+  );
+
+  /// Choix « une autre culture » : aucun modèle, aucune image, et le
+  /// diagnostic exige internet — ce que l'interface doit dire clairement.
+  static const CropProfile other = CropProfile(
+    crop: Crop.other,
+    displayName: 'Une autre culture',
+    modelAsset: null,
+    labelsAsset: null,
+    labelPrefix: null,
+    hasUnknownClass: false,
+    imageAsset: null,
   );
 
   static CropProfile of(Crop crop) =>

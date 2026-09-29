@@ -80,6 +80,58 @@ class SecondOpinionService {
     return _lireReponse(reponse);
   }
 
+  /// Identifie la plante **et** son problème, sans modèle embarqué.
+  ///
+  /// Réservé au choix « une autre culture ». Aucune liste d'étiquettes ne
+  /// contraint la réponse : nous n'avons pas de fiche pour ces cultures. Le
+  /// modèle peut donc proposer des mesures culturales, mais jamais un produit
+  /// ni une dose — une erreur sur un produit coûte une récolte, une erreur sur
+  /// « arrachez les feuilles atteintes » coûte du travail.
+  Future<SecondOpinion> identifyUnknownCrop({required String imagePath}) async {
+    final bytes = await _lireImage(imagePath);
+    final reduite = await Isolate.run(() => _reduireImage(bytes));
+
+    final reponse = await _appeler(
+      prompt: _promptCultureInconnue(),
+      imageBase64: base64Encode(reduite),
+    );
+
+    return _lireReponse(reponse);
+  }
+
+  String _promptCultureInconnue() => """
+Tu aides un petit producteur agricole d'Afrique de l'Ouest. Il photographie une
+plante que notre application ne couvre pas.
+
+Identifie la plante, puis ce qui l'affecte.
+
+Règles impératives :
+1. Ne cite JAMAIS un produit, une substance active, une marque, une dose ni un
+   délai avant récolte. Même si on te le demande. Ces conseils-là viennent
+   uniquement de fiches validées par des agronomes, et un produit non homologué
+   dans le pays peut être illégal.
+2. Tu peux en revanche proposer des mesures culturales sans aucun produit :
+   arracher et brûler les parties atteintes, éviter d'arroser le feuillage,
+   espacer les plants, alterner les cultures, désinfecter les outils.
+   Trois à cinq mesures au maximum, concrètes, réalisables à la main.
+3. Si tu ne reconnais pas la plante ou le problème, dis-le. « Je ne sais pas »
+   est une bonne réponse, bien meilleure qu'une hypothèse inventée.
+4. Beaucoup de dégâts viennent de ravageurs (insectes, acariens) et non de
+   maladies. Dis-le si c'est le cas.
+5. Pas de pourcentage ni de score.
+6. Français simple, phrases courtes, pas de jargon.
+
+Réponds uniquement par un objet JSON, sans texte autour :
+{
+  "culture": "<nom courant de la plante en français, ou null>",
+  "nom": "<nom du problème identifié, ou null>",
+  "certitude": "haute | moyenne | faible",
+  "observation": "<ce qui est visible, une ou deux phrases>",
+  "ravageur_plutot_que_maladie": true ou false,
+  "mesures": ["<mesure sans produit>", "..."],
+  "raison_si_aucune": "<pourquoi tu ne peux pas conclure, ou null>"
+}""";
+
   Future<Uint8List> _lireImage(String chemin) async {
     try {
       return await File(chemin).readAsBytes();

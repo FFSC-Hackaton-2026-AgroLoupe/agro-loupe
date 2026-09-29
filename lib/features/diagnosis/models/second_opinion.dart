@@ -37,6 +37,8 @@ class SecondOpinion {
     required this.observation,
     required this.pestRatherThanDisease,
     required this.reasonIfNone,
+    this.cropName,
+    this.culturalAdvice = const [],
   });
 
   /// Étiquette d'une de nos fiches, ou `null` si aucune ne convient.
@@ -62,6 +64,20 @@ class SecondOpinion {
   /// Pourquoi aucune fiche ne convient, quand [label] vaut `null`.
   final String? reasonIfNone;
 
+  /// Plante reconnue sur la photo, pour une culture hors des trois couvertes.
+  ///
+  /// `null` quand la culture était déjà connue. À montrer et à faire
+  /// confirmer : l'agriculteur sait ce qu'il a planté, c'est lui qui tranche.
+  final String? cropName;
+
+  /// Mesures culturales **sans aucun produit** : arracher et brûler les
+  /// feuilles atteintes, ne pas arroser le feuillage, espacer les plants.
+  ///
+  /// Autorisées parce qu'une erreur y coûte du travail, pas une récolte. Tout
+  /// ce qui touche à un produit, une substance ou une dose reste interdit au
+  /// modèle et ne vient que des fiches de l'équipe.
+  final List<String> culturalAdvice;
+
   /// Vrai si le modèle n'a retenu aucune de nos fiches.
   bool get isInconclusive => label == null;
 
@@ -74,7 +90,14 @@ class SecondOpinion {
       observation: _texte(json['observation']) ?? '',
       pestRatherThanDisease: json['ravageur_plutot_que_maladie'] == true,
       reasonIfNone: _texte(json['raison_si_aucune']),
+      cropName: _texte(json['culture']),
+      culturalAdvice: _liste(json['mesures']),
     );
+  }
+
+  static List<String> _liste(Object? valeur) {
+    if (valeur is! List) return const [];
+    return List.unmodifiable(valeur.map(_texte).whereType<String>());
   }
 
   /// Le modèle peut renvoyer `null`, la chaîne vide ou le mot « null ».

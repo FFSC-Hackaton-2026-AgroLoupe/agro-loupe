@@ -80,6 +80,25 @@ class SecondOpinionProvider extends ChangeNotifier {
     }
   }
 
+  /// Identifie la plante et son problème, pour une culture non couverte.
+  ///
+  /// Ce n'est pas un deuxième avis mais le seul : aucun modèle embarqué ne
+  /// peut répondre pour cette culture.
+  Future<void> askForUnknownCrop({required String imagePath}) async {
+    final service = _service;
+    if (service == null || _state is SecondOpinionAsking) return;
+
+    _imagePath = imagePath;
+    _publier(const SecondOpinionAsking());
+
+    try {
+      final opinion = await service.identifyUnknownCrop(imagePath: imagePath);
+      _publier(SecondOpinionReady(opinion));
+    } on AppException catch (error) {
+      _publier(SecondOpinionError(error.userMessage));
+    }
+  }
+
   /// Efface l'avis courant, par exemple pour réessayer après une erreur.
   void reset() {
     _imagePath = null;

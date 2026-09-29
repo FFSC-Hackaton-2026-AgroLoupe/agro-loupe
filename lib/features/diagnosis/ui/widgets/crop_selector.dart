@@ -30,7 +30,7 @@ class CropSelector extends StatelessWidget {
         Row(
           spacing: 12,
           children: [
-            for (final profile in CropProfile.all)
+            for (final profile in CropProfile.withLocalModel)
               Expanded(
                 child: _CropCard(
                   profile: profile,
@@ -42,7 +42,74 @@ class CropSelector extends StatelessWidget {
               ),
           ],
         ),
+        const SizedBox(height: 12),
+        _OtherCrop(isSelected: selected == Crop.other),
       ],
+    );
+  }
+}
+
+/// Entrée « une autre culture », hors des trois couvertes.
+///
+/// Présentée à part et en pleine largeur : ce n'est pas une culture de plus,
+/// c'est un autre parcours — l'analyse se fait en ligne, et l'utilisateur doit
+/// le savoir avant d'appuyer, pas après.
+class _OtherCrop extends StatelessWidget {
+  const _OtherCrop({required this.isSelected});
+
+  final bool isSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+
+    return Material(
+      color: isSelected ? colors.primaryContainer : colors.surfaceContainerLow,
+      borderRadius: BorderRadius.circular(10),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(10),
+        onTap: () => context.read<DiagnosisProvider>().selectCrop(Crop.other),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          child: Row(
+            children: [
+              Icon(
+                Icons.more_horiz,
+                size: 20,
+                color: isSelected
+                    ? colors.onPrimaryContainer
+                    : colors.onSurfaceVariant,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      CropProfile.other.displayName,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: isSelected ? colors.onPrimaryContainer : null,
+                      ),
+                    ),
+                    Text(
+                      'Nous trouvons la plante. Nécessite internet.',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: isSelected
+                            ? colors.onPrimaryContainer
+                            : colors.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (isSelected)
+                Icon(Icons.check, size: 18, color: colors.onPrimaryContainer),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
@@ -122,18 +189,29 @@ class _Leaf extends StatelessWidget {
             // suit la largeur de l'écran et devient énorme sur tablette.
             height: 84,
             width: double.infinity,
-            child: Image.asset(
-              profile.imageAsset,
-              fit: BoxFit.cover,
-              errorBuilder: (context, _, _) => ColoredBox(
+            child: switch (profile.imageAsset) {
+              // Pas de plante à montrer pour « une autre culture ».
+              null => ColoredBox(
                 color: colors.surfaceContainerHighest,
                 child: Icon(
-                  Icons.eco_outlined,
+                  Icons.more_horiz,
                   color: colors.onSurfaceVariant,
                   size: 32,
                 ),
               ),
-            ),
+              final asset => Image.asset(
+                asset,
+                fit: BoxFit.cover,
+                errorBuilder: (context, _, _) => ColoredBox(
+                  color: colors.surfaceContainerHighest,
+                  child: Icon(
+                    Icons.eco_outlined,
+                    color: colors.onSurfaceVariant,
+                    size: 32,
+                  ),
+                ),
+              ),
+            },
           ),
         ),
         if (isSelected)

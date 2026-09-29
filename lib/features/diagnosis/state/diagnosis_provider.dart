@@ -63,6 +63,16 @@ class DiagnosisExhausted extends DiagnosisState {
   final Diagnosis diagnosis;
 }
 
+/// Photo prise pour une culture sans modèle embarqué.
+///
+/// Rien n'a été analysé sur l'appareil : il n'y a pas de modèle à exécuter.
+/// L'identification revient entièrement au service en ligne.
+class DiagnosisOnline extends DiagnosisState {
+  const DiagnosisOnline(this.imagePath);
+
+  final String imagePath;
+}
+
 class DiagnosisError extends DiagnosisState {
   const DiagnosisError(this.message);
 
@@ -101,6 +111,17 @@ class DiagnosisProvider extends ChangeNotifier {
     if (_state is DiagnosisAnalyzing) return;
     _setState(const DiagnosisAnalyzing());
     try {
+      // Sans modèle embarqué, il n'y a rien à exécuter sur l'appareil : on
+      // se contente de la photo et on laisse le service en ligne identifier
+      // la plante et le problème.
+      if (!profile.hasLocalModel) {
+        final chemin = await _repository.takePhoto(source);
+        _setState(
+          chemin == null ? const DiagnosisIdle() : DiagnosisOnline(chemin),
+        );
+        return;
+      }
+
       final diagnosis = await _repository.diagnose(crop: _crop, source: source);
       // L'utilisateur a refermé la caméra sans photographier.
       if (diagnosis == null) {
@@ -154,6 +175,7 @@ class DiagnosisProvider extends ChangeNotifier {
         return true;
       case DiagnosisSuccess():
       case DiagnosisExhausted():
+      case DiagnosisOnline():
       case DiagnosisError():
         _setState(const DiagnosisIdle());
         return true;

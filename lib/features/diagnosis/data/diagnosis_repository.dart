@@ -14,7 +14,20 @@ class DiagnosisRepository {
   final PhotoService _photos;
 
   /// Prépare le modèle d'une culture pendant que l'utilisateur cadre sa photo.
-  Future<void> prepare(Crop crop) => _classifier.warmUp(CropProfile.of(crop));
+  ///
+  /// Sans effet pour une culture sans modèle embarqué : il n'y a rien à
+  /// charger, l'analyse se fera en ligne.
+  Future<void> prepare(Crop crop) {
+    final profile = CropProfile.of(crop);
+    if (!profile.hasLocalModel) return Future.value();
+    return _classifier.warmUp(profile);
+  }
+
+  /// Prend une photo sans l'analyser, pour les cultures sans modèle embarqué.
+  ///
+  /// Renvoie `null` si l'utilisateur renonce.
+  Future<String?> takePhoto(PhotoSource source) async =>
+      (await _photos.pick(source))?.path;
 
   /// Renvoie `null` si l'utilisateur renonce à prendre la photo.
   Future<Diagnosis?> diagnose({

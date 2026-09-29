@@ -109,11 +109,17 @@ class ClassifierService {
   }
 
   Future<Interpreter> _interpreterFor(CropProfile profile) async {
-    final cached = _interpreters[profile.modelAsset];
+    // Une culture sans modèle embarqué ne doit jamais arriver ici : son
+    // diagnostic passe par le service en ligne. Si cela se produit, c'est un
+    // défaut d'aiguillage, et mieux vaut une erreur nette qu'un plantage.
+    final asset = profile.modelAsset;
+    if (asset == null) throw const ModelException.unavailable();
+
+    final cached = _interpreters[asset];
     if (cached != null) return cached;
     try {
-      final interpreter = await Interpreter.fromAsset(profile.modelAsset);
-      _interpreters[profile.modelAsset] = interpreter;
+      final interpreter = await Interpreter.fromAsset(asset);
+      _interpreters[asset] = interpreter;
       return interpreter;
     } on Object catch (error) {
       throw ModelException.unavailable(cause: error);
@@ -121,10 +127,13 @@ class ClassifierService {
   }
 
   Future<List<String>> _labelsFor(CropProfile profile) async {
-    final cached = _labels[profile.labelsAsset];
+    final asset = profile.labelsAsset;
+    if (asset == null) throw const ModelException.unavailable();
+
+    final cached = _labels[asset];
     if (cached != null) return cached;
     try {
-      final raw = await rootBundle.loadString(profile.labelsAsset);
+      final raw = await rootBundle.loadString(asset);
       final labels = raw
           .split('\n')
           .map((line) => line.trim())
@@ -133,7 +142,7 @@ class ClassifierService {
       if (labels.isEmpty) {
         throw const ModelException.unavailable();
       }
-      _labels[profile.labelsAsset] = labels;
+      _labels[asset] = labels;
       return labels;
     } on ModelException {
       rethrow;

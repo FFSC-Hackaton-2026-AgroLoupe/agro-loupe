@@ -10,6 +10,7 @@ import '../../state/diagnosis_provider.dart';
 import '../widgets/crop_selector.dart';
 import '../widgets/diagnosis_result_card.dart';
 import '../widgets/second_opinion_card.dart';
+import '../widgets/unknown_crop_view.dart';
 
 /// Écran unique du diagnostic : choix de la culture, photo, résultat.
 class HomeScreen extends StatelessWidget {
@@ -65,6 +66,9 @@ class _Body extends StatelessWidget {
       DiagnosisSuccess() => DiagnosisResultCard(state),
       DiagnosisConfirmed() => DiagnosisConfirmedCard(state),
       DiagnosisExhausted() => _Exhausted(state),
+      DiagnosisOnline(:final imagePath) => UnknownCropView(
+        imagePath: imagePath,
+      ),
       DiagnosisError(:final message) => _Failure(message: message),
     };
   }

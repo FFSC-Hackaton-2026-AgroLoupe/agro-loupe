@@ -193,4 +193,57 @@ void main() {
       verifyNever(() => repository.prepare(any()));
     });
   });
+
+  group('culture sans modèle embarqué', () {
+    setUp(() {
+      when(
+        () => repository.takePhoto(any()),
+      ).thenAnswer((_) async => '/tmp/inconnue.jpg');
+    });
+
+    test("le profil « autre culture » n'a pas de modèle", () {
+      expect(CropProfile.other.hasLocalModel, isFalse);
+      expect(CropProfile.of(Crop.other), CropProfile.other);
+      // Le sélecteur n'affiche en ligne que les cultures diagnosticables
+      // hors connexion.
+      expect(CropProfile.withLocalModel, isNot(contains(CropProfile.other)));
+    });
+
+    test('la photo part en ligne sans passer par le classifieur', () async {
+      provider.selectCrop(Crop.other);
+      await provider.analyze(PhotoSource.camera);
+
+      expect(provider.state, isA<DiagnosisOnline>());
+      expect(
+        (provider.state as DiagnosisOnline).imagePath,
+        '/tmp/inconnue.jpg',
+      );
+
+      // Le point essentiel : aucun modèle n'existe pour cette culture, donc
+      // l'envoyer au classifieur ferait échouer l'analyse.
+      verifyNever(
+        () => repository.diagnose(
+          crop: any(named: 'crop'),
+          source: any(named: 'source'),
+        ),
+      );
+    });
+
+    test('renoncer à la photo ramène au repos', () async {
+      when(() => repository.takePhoto(any())).thenAnswer((_) async => null);
+
+      provider.selectCrop(Crop.other);
+      await provider.analyze(PhotoSource.camera);
+
+      expect(provider.state, isA<DiagnosisIdle>());
+    });
+
+    test('le retour depuis le résultat en ligne ramène au repos', () async {
+      provider.selectCrop(Crop.other);
+      await provider.analyze(PhotoSource.camera);
+
+      expect(provider.goBack(), isTrue);
+      expect(provider.state, isA<DiagnosisIdle>());
+    });
+  });
 }
