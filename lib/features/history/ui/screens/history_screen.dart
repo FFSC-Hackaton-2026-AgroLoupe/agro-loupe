@@ -3,14 +3,13 @@ import 'package:provider/provider.dart';
 
 import '../../../../shared/widgets/app_bar_title.dart';
 import '../../state/history_provider.dart';
-import '../widgets/history_empty.dart';
+import '../widgets/history_tile.dart';
 
-/// Historique local des diagnostics.
+/// Historique local des diagnostics, du plus récent au plus ancien.
 ///
-/// L'état vide et l'écran de détail sont écrits ; **la liste reste à faire**
-/// — c'est la tâche H1 de Hannatou. `HistoryProvider` lui fournit déjà les
-/// entrées triées, du plus récent au plus ancien : il n'y a qu'à remplacer
-/// le bloc marqué ci-dessous par la liste.
+/// Lit `HistoryProvider` : dès qu'un diagnostic est confirmé ou abandonné
+/// côté onglet Diagnostic (`record()`), l'écran se reconstruit tout seul
+/// via `notifyListeners()` — pas besoin de relancer l'application.
 class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});
 
@@ -22,39 +21,63 @@ class _HistoryScreenState extends State<HistoryScreen> {
   @override
   void initState() {
     super.initState();
-    // Rechargé à chaque ouverture de l'onglet : un diagnostic a pu être
-    // enregistré depuis la dernière fois.
+    // Filet de sécurité : si l'écran est affiché avant que le chargement
+    // initial ait été déclenché ailleurs, on le déclenche ici.
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) context.read<HistoryProvider>().load();
+      final provider = context.read<HistoryProvider>();
+      if (provider.state is HistoryLoading) {
+        provider.load();
+      }
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final state = context.watch<HistoryProvider>().state;
 
     return Scaffold(
       appBar: AppBar(title: const AppBarTitle('Historique')),
       body: switch (state) {
         HistoryLoading() => const Center(child: CircularProgressIndicator()),
-        HistoryError(:final message) => _Erreur(message: message),
-        HistoryReady(isEmpty: true) => const HistoryEmpty(),
-        HistoryReady(:final entries) => _AFaire(nombre: entries.length),
+        HistoryError(:final message) =>
+          _ErrorState(theme: theme, message: message),
+        HistoryReady(:final entries) =>
+          entries.isEmpty
+              ? _EmptyState(theme: theme)
+              : _HistoryList(entries: entries),
       },
     );
   }
 }
 
-/// Emplacement de la liste, en attendant la tâche H1.
-class _AFaire extends StatelessWidget {
-  const _AFaire({required this.nombre});
+class _HistoryList extends StatelessWidget {
+  const _HistoryList({required this.entries});
 
-  final int nombre;
+  final List<dynamic> entries;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final sorted = [...entries]
+      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
+    return ListView.separated(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      itemCount: sorted.length,
+      separatorBuilder: (context, index) =>
+          const Divider(height: 1, indent: 88, endIndent: 16),
+      itemBuilder: (context, index) => HistoryTile(entry: sorted[index]),
+    );
+  }
+}
+
+class _EmptyState extends StatelessWidget {
+  const _EmptyState({required this.theme});
+
+  final ThemeData theme;
+
+  @override
+  Widget build(BuildContext context) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 32),
@@ -62,20 +85,20 @@ class _AFaire extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              Icons.inventory_2_outlined,
-              size: 56,
+              Icons.history_outlined,
+              size: 64,
               color: theme.colorScheme.onSurfaceVariant,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             Text(
-              '$nombre diagnostic${nombre > 1 ? 's' : ''} enregistré'
-              '${nombre > 1 ? 's' : ''}',
-              style: theme.textTheme.titleMedium,
+              'Vos diagnostics passés',
+              style: theme.textTheme.titleLarge,
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
             Text(
-              "L'affichage de la liste est en cours de construction.",
+              'Ils resteront sur votre téléphone, consultables sans '
+              'connexion.',
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
@@ -88,15 +111,14 @@ class _AFaire extends StatelessWidget {
   }
 }
 
-class _Erreur extends StatelessWidget {
-  const _Erreur({required this.message});
+class _ErrorState extends StatelessWidget {
+  const _ErrorState({required this.theme, required this.message});
 
+  final ThemeData theme;
   final String message;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Center(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 32),
@@ -105,14 +127,19 @@ class _Erreur extends StatelessWidget {
           children: [
             Icon(
               Icons.error_outline,
-              size: 56,
-              color: theme.colorScheme.onSurfaceVariant,
+              size: 64,
+              color: theme.colorScheme.error,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             Text(
               message,
               style: theme.textTheme.bodyMedium,
               textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            FilledButton(
+              onPressed: () => context.read<HistoryProvider>().load(),
+              child: const Text('Réessayer'),
             ),
           ],
         ),
