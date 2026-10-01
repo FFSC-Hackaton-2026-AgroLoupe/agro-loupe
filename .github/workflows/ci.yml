@@ -40,3 +40,24 @@ jobs:
 
       - name: Tests
         run: flutter test
+
+  auteurs:
+    name: Pas de co-auteur automatique
+    # Uniquement sur les Pull Requests : sur un push, la plage comparée
+    # remonterait des commits déjà fusionnés et rendrait la branche
+    # durablement rouge pour une raison qu'on ne peut plus corriger.
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # L'historique complet est nécessaire : la vérification compare la
+          # branche à sa cible, et un clone superficiel n'a pas la base.
+          fetch-depth: 0
+
+      - name: Vérifier les messages de commit
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+        run: bash tools/verifier_auteurs.sh "$BASE" "$HEAD"
