@@ -11,7 +11,13 @@ class _MockConnectivityService extends Mock implements ConnectivityService {}
 /// dans le titre — et l'assertion deviendrait ambiguë.
 const _accueil = 'Photographiez une feuille';
 const _catalogue = 'Les maladies, culture par culture';
-const _historique = 'Vos diagnostics passés';
+
+/// Le titre de l'onglet Historique, dans sa barre — et non le libellé de la
+/// barre de navigation, qui porte le même mot.
+final _historique = find.ancestor(
+  of: find.text('Historique'),
+  matching: find.byType(AppBar),
+);
 
 void main() {
   late _MockConnectivityService connectivity;
@@ -45,7 +51,7 @@ void main() {
 
     await tester.tap(find.byIcon(Icons.history_outlined));
     await tester.pumpAndSettle();
-    expect(find.text(_historique), findsOneWidget);
+    expect(_historique, findsOneWidget);
 
     await tester.tap(find.byIcon(Icons.eco_outlined));
     await tester.pumpAndSettle();

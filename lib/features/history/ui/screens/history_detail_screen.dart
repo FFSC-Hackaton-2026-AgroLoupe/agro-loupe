@@ -60,9 +60,9 @@ class _HistoryPhoto extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             'Photo non disponible sur cet appareil',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: colors.onSurfaceVariant,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: colors.onSurfaceVariant),
             textAlign: TextAlign.center,
           ),
         ],
@@ -213,7 +213,11 @@ class _AbandonedCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.info_outline, size: 20, color: colors.onSurfaceVariant),
+              Icon(
+                Icons.info_outline,
+                size: 20,
+                color: colors.onSurfaceVariant,
+              ),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(

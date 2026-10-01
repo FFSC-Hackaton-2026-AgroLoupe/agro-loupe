@@ -1,0 +1,42 @@
+name: CI
+
+# Exigée par la section 9 du CLAUDE.md : aucune Pull Request ne doit pouvoir
+# être fusionnée avec une analyse sale ou des tests rouges. Son absence a déjà
+# laissé passer un merge cassé sur `develop`.
+on:
+  pull_request:
+  push:
+    branches: [main, develop]
+
+jobs:
+  verifier:
+    name: Format, analyse et tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      # `pubspec.yaml` déclare `.env` dans les assets, et ce fichier est
+      # volontairement absent du dépôt : il porte les clés en développement.
+      # Sans lui, la compilation échoue ici avec une erreur d'asset manquant
+      # qui n'a rien à voir avec le code soumis. Le modèle sans secret suffit.
+      - name: Préparer la configuration sans secret
+        run: cp .env.example .env
+
+      - run: flutter pub get
+
+      # En premier : un formatage non appliqué noie la relecture sous des
+      # différences d'indentation.
+      - name: Formatage
+        run: dart format --output=none --set-exit-if-changed .
+
+      - name: Analyse statique
+        run: flutter analyze
+
+      - name: Tests
+        run: flutter test

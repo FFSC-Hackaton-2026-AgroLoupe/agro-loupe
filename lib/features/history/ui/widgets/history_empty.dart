@@ -67,9 +67,7 @@ class HistoryEmpty extends StatelessWidget {
               const SizedBox(height: 28),
               FilledButton.icon(
                 onPressed: onAction,
-                style: FilledButton.styleFrom(
-                  minimumSize: const Size(200, 48),
-                ),
+                style: FilledButton.styleFrom(minimumSize: const Size(200, 48)),
                 icon: const Icon(Icons.photo_camera_outlined),
                 label: Text(actionLabel),
               ),
