@@ -11,7 +11,7 @@
 #      alors rien.
 #
 # Le travail est celui de la personne qui l'a dirigé ; c'est son nom qui doit
-# y figurer.
+# y figurer aussi.
 #
 # Usage :
 #   tools/verifier_auteurs.sh                   # depuis origin/develop
