@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import '../../../core/utils/date_fr.dart';
 import '../../diagnosis/models/crop_profile.dart';
 import '../../treatments/models/treatment.dart';
 
@@ -50,31 +51,12 @@ class HistoryEntry {
 
   int get percent => (confidence * 100).round();
 
-
   /// Date formatée en français clair (ex. « 26 sept. 2026 à 14:30 »).
-  String get formattedDate {
-    const mois = [
-      '',
-      'janv.',
-      'févr.',
-      'mars',
-      'avr.',
-      'mai',
-      'juin',
-      'juil.',
-      'août',
-      'sept.',
-      'oct.',
-      'nov.',
-      'déc.',
-    ];
-    final jour = createdAt.day;
-    final nomMois = mois[createdAt.month];
-    final annee = createdAt.year;
-    final heure = createdAt.hour.toString().padLeft(2, '0');
-    final minute = createdAt.minute.toString().padLeft(2, '0');
-    return '$jour $nomMois $annee à $heure:$minute';
-  }
+  /// Date lisible, par exemple `26 sept. 2026 à 14:30`.
+  ///
+  /// Le formatage lui-même vit dans `core/utils` : la liste de Hannatou en
+  /// aura besoin aussi, et un modèle n'a pas à porter de présentation.
+  String get formattedDate => DateFr.dateEtHeure(createdAt);
 
   /// Nom affiché de la culture en français.
   String get cropDisplayName => CropProfile.of(crop).displayName;

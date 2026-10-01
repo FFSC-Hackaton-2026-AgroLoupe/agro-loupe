@@ -145,7 +145,6 @@ void main() {
       expect(find.text('Éviter que cela revienne'), findsNothing);
     });
 
-
     testWidgets('gère proprement une photo locale supprimée ou introuvable', (
       tester,
     ) async {
@@ -182,6 +181,5 @@ void main() {
         findsOneWidget,
       );
     });
-
   });
 }

@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'core/config/ai_config.dart';
 import 'core/constants/app_constants.dart';
 import 'core/services/connectivity_service.dart';
+import 'core/services/local_database.dart';
 import 'core/services/photo_service.dart';
 import 'core/theme/app_theme.dart';
 import 'features/diagnosis/data/classifier_service.dart';
@@ -11,6 +12,8 @@ import 'features/diagnosis/data/diagnosis_repository.dart';
 import 'features/diagnosis/data/second_opinion_service.dart';
 import 'features/diagnosis/state/diagnosis_provider.dart';
 import 'features/diagnosis/state/second_opinion_provider.dart';
+import 'features/history/data/history_repository.dart';
+import 'features/history/state/history_provider.dart';
 import 'features/onboarding/data/onboarding_storage.dart';
 import 'features/onboarding/state/coach_controller.dart';
 import 'features/onboarding/ui/screens/onboarding_screen.dart';
@@ -25,6 +28,7 @@ class AgroLoupeApp extends StatelessWidget {
     this.connectivityService,
     this.diagnosisRepository,
     this.treatmentRepository,
+    this.localDatabase,
     this.secondOpinionService,
     this.showOnboarding = false,
     this.showCoachMarks = true,
@@ -41,6 +45,10 @@ class AgroLoupeApp extends StatelessWidget {
   final ConnectivityService? connectivityService;
   final DiagnosisRepository? diagnosisRepository;
   final TreatmentRepository? treatmentRepository;
+
+  /// Base locale. `null` en production ; les tests en fournissent une en
+  /// mémoire pour ne rien écrire sur le disque.
+  final LocalDatabase? localDatabase;
 
   /// Deuxieme avis en ligne. `null` en production : l'application le construit
   /// elle-meme a partir de [AiConfig], et s'en passe s'il n'est pas configure.
@@ -78,11 +86,32 @@ class AgroLoupeApp extends StatelessWidget {
         Provider<TreatmentRepository>(
           create: (_) => treatmentRepository ?? TreatmentRepository(),
         ),
+        Provider<LocalDatabase>(
+          create: (_) => localDatabase ?? LocalDatabase(),
+          dispose: (_, base) => base.close(),
+        ),
 
         // 4. États d'écran.
-        ChangeNotifierProvider<DiagnosisProvider>(
+        ChangeNotifierProvider<TreatmentProvider>(
           create: (context) =>
-              DiagnosisProvider(context.read<DiagnosisRepository>()),
+              TreatmentProvider(context.read<TreatmentRepository>())..load(),
+        ),
+        // L'historique retrouve la fiche par son étiquette au moment de la
+        // lecture : une correction venue de Firestore profite donc aussi aux
+        // diagnostics déjà enregistrés.
+        ProxyProvider2<LocalDatabase, TreatmentProvider, HistoryRepository>(
+          update: (_, base, fiches, _) =>
+              HistoryRepository(base, lookup: fiches.forLabel),
+        ),
+        ChangeNotifierProvider<HistoryProvider>(
+          create: (context) =>
+              HistoryProvider(context.read<HistoryRepository>()),
+        ),
+        ChangeNotifierProvider<DiagnosisProvider>(
+          create: (context) => DiagnosisProvider(
+            context.read<DiagnosisRepository>(),
+            history: context.read<HistoryRepository>(),
+          ),
         ),
         // Les fiches sont chargées dès le démarrage : le fichier est petit, et
         // une fiche doit s'afficher sans attente après un diagnostic.
