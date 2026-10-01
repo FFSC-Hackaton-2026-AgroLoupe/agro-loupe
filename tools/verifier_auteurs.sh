@@ -18,11 +18,12 @@ head="${2:-HEAD}"
 # Noms et domaines des agents connus, cherchés sans tenir compte de la casse.
 motifs='cursor|claude|copilot|codeium|windsurf|devin|chatgpt|openai|anthropic|noreply@google'
 
-# Commits déjà fusionnés avant la mise en place de cette vérification.
-# Les réécrire imposerait un `push --force` à toute l'équipe, pour un gain
-# purement cosmétique. Ne jamais allonger cette liste : elle existe pour le
-# passé, pas pour tolérer de nouveaux cas.
-exceptions='c932577989d52237bcc1349df9a2f668550dd851'
+# Aucune exception. L'historique a été réécrit le 1er octobre 2026 pour
+# retirer le seul commit concerné : il n'y a plus de passe-droit, ni pour le
+# passé ni pour personne. Ne pas rouvrir cette liste — corriger le commit
+# fautif coûte une minute, le laisser passer coûte une réécriture d'historique
+# et une resynchronisation de toute l'équipe.
+exceptions=''
 
 echo "Plage vérifiée : $base..$head"
 
