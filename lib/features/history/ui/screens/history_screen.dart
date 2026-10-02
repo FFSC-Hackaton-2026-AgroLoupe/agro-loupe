@@ -3,7 +3,10 @@ import 'package:provider/provider.dart';
 
 import '../../../../shared/widgets/app_bar_title.dart';
 import '../../state/history_provider.dart';
+import '../../models/history_entry.dart';
 import '../widgets/history_empty.dart';
+import '../widgets/history_tile.dart';
+import 'history_detail_screen.dart';
 
 /// Historique local des diagnostics.
 ///
@@ -39,51 +42,93 @@ class _HistoryScreenState extends State<HistoryScreen> {
         HistoryLoading() => const Center(child: CircularProgressIndicator()),
         HistoryError(:final message) => _Erreur(message: message),
         HistoryReady(isEmpty: true) => const HistoryEmpty(),
-        HistoryReady(:final entries) => _AFaire(nombre: entries.length),
+        HistoryReady(:final entries) => _Liste(entries: entries),
       },
     );
   }
 }
 
-/// Emplacement de la liste, en attendant la tâche H1.
-class _AFaire extends StatelessWidget {
-  const _AFaire({required this.nombre});
+/// Liste des diagnostics, du plus récent au plus ancien.
+class _Liste extends StatelessWidget {
+  const _Liste({required this.entries});
 
-  final int nombre;
+  final List<HistoryEntry> entries;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.inventory_2_outlined,
-              size: 56,
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              '$nombre diagnostic${nombre > 1 ? 's' : ''} enregistré'
-              '${nombre > 1 ? 's' : ''}',
-              style: theme.textTheme.titleMedium,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              "L'affichage de la liste est en cours de construction.",
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
+    return ListView.separated(
+      padding: EdgeInsets.fromLTRB(
+        16,
+        12,
+        16,
+        24 + MediaQuery.paddingOf(context).bottom,
       ),
+      itemCount: entries.length,
+      separatorBuilder: (_, _) => const SizedBox(height: 10),
+      itemBuilder: (context, i) {
+        final entry = entries[i];
+        return Dismissible(
+          key: ValueKey(entry.id ?? entry.createdAt.toIso8601String()),
+          // Dans un seul sens : un balayage vers la droite est le geste de
+          // retour sur Android, le confondre avec une suppression ferait
+          // perdre des diagnostics par accident.
+          direction: DismissDirection.endToStart,
+          background: const _FondSuppression(),
+          confirmDismiss: (_) => _confirmer(context),
+          onDismissed: (_) => context.read<HistoryProvider>().remove(entry),
+          child: HistoryTile(
+            entry: entry,
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => HistoryDetailScreen(entry: entry),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<bool> _confirmer(BuildContext context) async {
+    final supprimer = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Supprimer ce diagnostic ?'),
+        content: const Text(
+          'Il sera retiré de votre historique. La photo reste sur votre '
+          'téléphone.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Annuler'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Supprimer'),
+          ),
+        ],
+      ),
+    );
+    return supprimer ?? false;
+  }
+}
+
+class _FondSuppression extends StatelessWidget {
+  const _FondSuppression();
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+
+    return Container(
+      alignment: Alignment.centerRight,
+      padding: const EdgeInsets.only(right: 20),
+      decoration: BoxDecoration(
+        color: colors.errorContainer,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Icon(Icons.delete_outline, color: colors.onErrorContainer),
     );
   }
 }
