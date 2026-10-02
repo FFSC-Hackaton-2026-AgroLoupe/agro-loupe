@@ -38,7 +38,7 @@ class DiseaseScreen extends StatelessWidget {
           ),
           Expanded(
             child: ListView(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 50),
               children: [
                 SymptomsPanel(treatment: treatment),
                 TreatmentSheetView(treatment: treatment),
