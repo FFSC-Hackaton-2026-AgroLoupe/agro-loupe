@@ -2,8 +2,11 @@ import 'package:flutter/foundation.dart';
 
 import '../../../core/errors/app_exception.dart';
 import '../../../core/services/photo_service.dart';
+import '../../history/data/history_repository.dart';
+import '../../history/models/history_entry.dart';
 import '../data/diagnosis_repository.dart';
 import '../models/crop_profile.dart';
+import '../models/disease_names.dart';
 import '../models/diagnosis.dart';
 import '../models/prediction.dart';
 
@@ -82,9 +85,15 @@ class DiagnosisError extends DiagnosisState {
 
 /// Pilote le diagnostic : choix de la culture, analyse, puis confirmation.
 class DiagnosisProvider extends ChangeNotifier {
-  DiagnosisProvider(this._repository);
+  DiagnosisProvider(this._repository, {HistoryRepository? history})
+    : _history = history;
 
   final DiagnosisRepository _repository;
+
+  /// Historique local. Injecté via Provider, comme le prévoit la section 3
+  /// pour les échanges entre features. `null` dans les tests qui ne
+  /// s'intéressent pas à l'enregistrement.
+  final HistoryRepository? _history;
 
   DiagnosisState _state = const DiagnosisIdle();
   DiagnosisState get state => _state;
@@ -141,14 +150,20 @@ class DiagnosisProvider extends ChangeNotifier {
   void rejectCurrent() {
     final current = _state;
     if (current is! DiagnosisSuccess) return;
+    final epuise = !current.hasNext;
     _setState(
-      current.hasNext
-          ? DiagnosisSuccess(
+      epuise
+          ? DiagnosisExhausted(current.diagnosis)
+          : DiagnosisSuccess(
               current.diagnosis,
               shownIndex: current.shownIndex + 1,
-            )
-          : DiagnosisExhausted(current.diagnosis),
+            ),
     );
+    // Une analyse abandonnée reste une analyse : elle a sa place dans
+    // l'historique, marquée comme non confirmée.
+    if (epuise) {
+      _enregistrer(current.diagnosis, current.prediction, confirme: false);
+    }
   }
 
   /// L'utilisateur reconnaît les symptômes décrits.
@@ -158,6 +173,34 @@ class DiagnosisProvider extends ChangeNotifier {
     _setState(
       DiagnosisConfirmed(current.diagnosis, shownIndex: current.shownIndex),
     );
+    _enregistrer(current.diagnosis, current.prediction, confirme: true);
+  }
+
+  /// Consigne le diagnostic dans l'historique local.
+  ///
+  /// Sans attendre, et sans jamais faire échouer le parcours : l'utilisateur
+  /// vient d'obtenir sa réponse, un problème d'écriture ne le regarde pas.
+  void _enregistrer(
+    Diagnosis diagnosis,
+    Prediction prediction, {
+    required bool confirme,
+  }) {
+    final historique = _history;
+    if (historique == null) return;
+
+    historique
+        .add(
+          HistoryEntry(
+            imagePath: diagnosis.imagePath,
+            crop: diagnosis.crop,
+            diseaseName: DiseaseNames.of(prediction.label),
+            modelLabel: prediction.label,
+            confidence: prediction.confidence,
+            createdAt: diagnosis.createdAt,
+            isConfirmed: confirme,
+          ),
+        )
+        .ignore();
   }
 
   /// Revient d'une étape en arrière.

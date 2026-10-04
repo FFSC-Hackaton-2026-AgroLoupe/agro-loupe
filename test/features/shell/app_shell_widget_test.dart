@@ -10,8 +10,20 @@ class _MockConnectivityService extends Mock implements ConnectivityService {}
 /// une fois un onglet ouvert, son nom apparaît deux fois — dans la barre et
 /// dans le titre — et l'assertion deviendrait ambiguë.
 const _accueil = 'Photographiez une feuille';
-const _catalogue = 'Les maladies, culture par culture';
-const _historique = 'Vos diagnostics passés';
+
+/// Le titre de l'onglet Catalogue dans sa barre, et non le libellé de la
+/// barre de navigation, qui porte le même mot.
+final _catalogue = find.ancestor(
+  of: find.text('Catalogue'),
+  matching: find.byType(AppBar),
+);
+
+/// Le titre de l'onglet Historique, dans sa barre — et non le libellé de la
+/// barre de navigation, qui porte le même mot.
+final _historique = find.ancestor(
+  of: find.text('Historique'),
+  matching: find.byType(AppBar),
+);
 
 void main() {
   late _MockConnectivityService connectivity;
@@ -22,6 +34,12 @@ void main() {
       () => connectivity.onStatusChanged,
     ).thenAnswer((_) => const Stream<ConnectionStatus>.empty());
   });
+
+  /// Une pulsation bornée plutôt que `pumpAndSettle` : tant que les fiches
+  /// se chargent, le catalogue affiche un indicateur circulaire, dont
+  /// l'animation ne s'arrête jamais — `pumpAndSettle` expirerait.
+  Future<void> battre(WidgetTester tester) =>
+      tester.pump(const Duration(milliseconds: 50));
 
   Future<void> pumpApp(WidgetTester tester) async {
     await tester.pumpWidget(
@@ -39,16 +57,16 @@ void main() {
     expect(find.text(_accueil), findsOneWidget);
 
     await tester.tap(find.byIcon(Icons.menu_book_outlined));
-    await tester.pumpAndSettle();
-    expect(find.text(_catalogue), findsOneWidget);
+    await battre(tester);
+    expect(_catalogue, findsOneWidget);
     expect(find.text(_accueil), findsNothing);
 
     await tester.tap(find.byIcon(Icons.history_outlined));
-    await tester.pumpAndSettle();
-    expect(find.text(_historique), findsOneWidget);
+    await battre(tester);
+    expect(_historique, findsOneWidget);
 
     await tester.tap(find.byIcon(Icons.eco_outlined));
-    await tester.pumpAndSettle();
+    await battre(tester);
     expect(find.text(_accueil), findsOneWidget);
   });
 
@@ -58,15 +76,15 @@ void main() {
     await pumpApp(tester);
 
     await tester.tap(find.byIcon(Icons.menu_book_outlined));
-    await tester.pumpAndSettle();
-    expect(find.text(_catalogue), findsOneWidget);
+    await battre(tester);
+    expect(_catalogue, findsOneWidget);
 
     // Bouton retour du téléphone : il doit revenir au diagnostic plutôt que
     // de quitter l'application.
     await tester.binding.handlePopRoute();
-    await tester.pumpAndSettle();
+    await battre(tester);
 
     expect(find.text(_accueil), findsOneWidget);
-    expect(find.text(_catalogue), findsNothing);
+    expect(_catalogue, findsNothing);
   });
 }
