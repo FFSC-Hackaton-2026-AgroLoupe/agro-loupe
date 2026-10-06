@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer' as developer;
 import 'dart:io';
 import 'dart:isolate';
 import 'dart:math' as math;
@@ -39,9 +40,14 @@ class SecondOpinionService {
                // Mesuré : 8 à 10 s sur une bonne connexion. En 2G rurale il
                // faut davantage, mais au-delà l'attente n'est plus tenable :
                // mieux vaut un échec clair qu'un écran figé.
+               //
+               // La réception est à 60 s et non 30 : un modèle à raisonnement
+               // réfléchit avant d'écrire, et sur une photo cette réflexion
+               // dépassait le délai. L'échec ressemblait alors à une panne de
+               // réseau alors que l'appel était simplement en cours.
                connectTimeout: const Duration(seconds: 10),
                sendTimeout: const Duration(seconds: 30),
-               receiveTimeout: const Duration(seconds: 30),
+               receiveTimeout: const Duration(seconds: 60),
              ),
            );
 
@@ -148,17 +154,28 @@ Réponds uniquement par un objet JSON, sans texte autour :
     required String imageBase64,
   }) async {
     try {
-      final reponse = await _dio.post<Map<String, dynamic>>(
+      // `post<dynamic>` et non `post<Map>` : en cas d'erreur le service
+      // répond parfois du texte brut, et un transtypage échouerait avant
+      // qu'on ait pu lire le motif.
+      final reponse = await _dio.post<dynamic>(
         '${baseUrl.replaceAll(RegExp(r'/+$'), '')}/chat/completions',
         options: Options(
           headers: {
             'Authorization': 'Bearer $apiKey',
             'Content-Type': 'application/json',
           },
+          // On accepte tous les codes HTTP pour les traiter nous-mêmes :
+          // sinon Dio lève avant qu'on ait lu le corps de la réponse, qui
+          // porte justement le motif du refus.
+          validateStatus: (_) => true,
         ),
         data: {
           'model': model,
-          'max_tokens': 600,
+          // 600 ne suffisait pas. Un modèle à raisonnement consomme ce budget
+          // avant d'écrire sa réponse, et le JSON de la culture inconnue —
+          // jusqu'à cinq mesures — est long. Budget épuisé, le JSON est
+          // tronqué donc illisible, et rien ne le disait.
+          'max_tokens': 2000,
           'messages': [
             {
               'role': 'user',
@@ -174,32 +191,85 @@ Réponds uniquement par un objet JSON, sans texte autour :
         },
       );
 
-      final choix = (reponse.data?['choices'] as List?)?.firstOrNull;
-      final contenu = (choix as Map?)?['message']?['content'];
-      if (contenu is! String || contenu.trim().isEmpty) {
+      final statut = reponse.statusCode ?? 0;
+      final donnees = reponse.data;
+
+      if (statut < 200 || statut >= 300) {
+        _journal('refus HTTP $statut — ${_extrait(donnees)}');
+        throw const NetworkException.secondOpinionUnavailable();
+      }
+      if (donnees is! Map) {
+        _journal('corps inattendu — ${_extrait(donnees)}');
         throw const NetworkException.secondOpinionUnreadable();
+      }
+
+      final choix = (donnees['choices'] as List?)?.firstOrNull as Map?;
+      final contenu = choix?['message']?['content'];
+      final motifArret = choix?['finish_reason'];
+
+      if (contenu is! String || contenu.trim().isEmpty) {
+        // Cas typique d'un modèle à raisonnement : tout le budget de jetons
+        // est parti dans la réflexion, il ne reste rien à écrire. `usage` le
+        // montre, c'est pour cela qu'il est journalisé.
+        _journal(
+          'réponse vide — finish_reason=$motifArret usage=${donnees['usage']}',
+        );
+        throw const NetworkException.secondOpinionUnreadable();
+      }
+      if (motifArret == 'length') {
+        _journal(
+          'réponse coupée par max_tokens, JSON incomplet — '
+          'usage=${donnees['usage']}',
+        );
       }
       return contenu;
     } on DioException catch (error) {
+      _journal('appel impossible — ${error.type.name} : ${error.message}');
       throw NetworkException.secondOpinionUnavailable(cause: error);
     }
   }
 
+  /// Trace ce qui s'est réellement passé, en console de développement.
+  ///
+  /// Les deux messages affichés à l'utilisateur sont volontairement vagues —
+  /// un code HTTP ne lui sert à rien. Mais sans cette trace, personne dans
+  /// l'équipe ne peut distinguer une clé refusée d'un quota dépassé ou d'une
+  /// réponse tronquée : les trois donnaient le même écran.
+  void _journal(String message) =>
+      developer.log(message, name: 'second_opinion');
+
+  /// Début d'une valeur, pour le journal.
+  ///
+  /// Tronqué : une réponse d'erreur peut faire plusieurs kilo-octets, et une
+  /// console les coupe silencieusement au milieu.
+  static String _extrait(Object? valeur) {
+    final texte = valeur?.toString() ?? 'aucun corps';
+    return texte.length <= 400 ? texte : '${texte.substring(0, 400)}…';
+  }
+
   SecondOpinion _lireReponse(String contenu) {
-    // Le modèle encadre parfois sa réponse par un bloc de code.
-    var nettoye = contenu.trim();
-    if (nettoye.startsWith('```')) {
-      nettoye = nettoye.replaceFirst(RegExp(r'^```(json)?'), '');
-      nettoye = nettoye.replaceFirst(RegExp(r'```$'), '').trim();
+    // On isole l'objet JSON entre la première accolade et la dernière, au
+    // lieu de nettoyer les cas particuliers un par un. Malgré la consigne, le
+    // modèle encadre parfois sa réponse d'un bloc de code, et parfois d'une
+    // phrase d'introduction : les deux faisaient échouer la lecture.
+    final debut = contenu.indexOf('{');
+    final fin = contenu.lastIndexOf('}');
+    if (debut == -1 || fin <= debut) {
+      _journal('aucun objet JSON dans la réponse — ${_extrait(contenu)}');
+      throw const NetworkException.secondOpinionUnreadable();
     }
 
     try {
-      final json = jsonDecode(nettoye);
+      final json = jsonDecode(contenu.substring(debut, fin + 1));
       if (json is! Map<String, dynamic>) {
+        _journal('JSON valide mais pas un objet — ${_extrait(contenu)}');
         throw const NetworkException.secondOpinionUnreadable();
       }
       return SecondOpinion.fromJson(json);
     } on FormatException catch (error) {
+      // Cas le plus fréquent : réponse coupée en plein milieu. La dernière
+      // accolade trouvée fermait alors un objet imbriqué.
+      _journal('JSON invalide (${error.message}) — ${_extrait(contenu)}');
       throw NetworkException.secondOpinionUnreadable(cause: error);
     }
   }
