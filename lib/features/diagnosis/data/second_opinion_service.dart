@@ -1,11 +1,11 @@
 import 'dart:convert';
-import 'dart:developer' as developer;
 import 'dart:io';
 import 'dart:isolate';
 import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:image/image.dart' as img;
 
 import '../../../core/errors/app_exception.dart';
@@ -229,14 +229,17 @@ Réponds uniquement par un objet JSON, sans texte autour :
     }
   }
 
-  /// Trace ce qui s'est réellement passé, en console de développement.
+  /// Trace ce qui s'est réellement passé.
   ///
   /// Les deux messages affichés à l'utilisateur sont volontairement vagues —
   /// un code HTTP ne lui sert à rien. Mais sans cette trace, personne dans
   /// l'équipe ne peut distinguer une clé refusée d'un quota dépassé ou d'une
   /// réponse tronquée : les trois donnaient le même écran.
-  void _journal(String message) =>
-      developer.log(message, name: 'second_opinion');
+  ///
+  /// `debugPrint` et non `dart:developer` : ce dernier passe par le service de
+  /// débogage, qui n'est pas attaché à un APK de démonstration. La trace
+  /// n'apparaissait donc pas là où on en a le plus besoin.
+  void _journal(String message) => debugPrint('[second_opinion] $message');
 
   /// Début d'une valeur, pour le journal.
   ///
